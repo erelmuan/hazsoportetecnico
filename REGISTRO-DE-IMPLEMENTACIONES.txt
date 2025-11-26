@@ -1,0 +1,52 @@
+En esta version se incorpora el web service
+CONFIGURACION DE WEB SERVICE:
+
+
+
+CONFIGURACION DEL TEMPLATE ADMINLTE 3 :
+
+  *Incoporacion de boostrap 4
+
+
+
+CONFIGURACION DE CONTROLADOR BASE:
+  *Mensajes de error.
+  *seguridad
+
+
+
+CONFIGURACION DE COMPORTAMIENTO (behaviors)
+  *AUDITORIA
+
+
+  *MENSSAGE
+
+
+
+USO DEL USUARIO EN VEZ DE USER
+
+IMPLEMENTACION DE RBAC, Tuve que incorporar en la vista las carpetas  Aassigment. item, layout,  route, rule.
+Para poder modificar esas plantillas - no encuentro  permission ni role
+permission y role esta en ITEM, en el index de la misma carpeta.
+
+----- para cambiar los botones----
+tuve que incorporar:
+use app\components\MyActionColumn;
+cambiar
+     \yii\grid\GridView::widget
+
+  por \kartik\grid\GridView::widget(
+
+Ademas
+[
+    'header' => Yii::t('yii2mod.rbac', 'Action'),
+    'class' => 'yii\grid\ActionColumn',
+    'contentOptions' => ['style' => 'width:120px; text-align:center;'],
+],
+
+por
+
+[
+    'class' => MyActionColumn::class,
+    'template' => '{view} {update} {delete}',
+],
