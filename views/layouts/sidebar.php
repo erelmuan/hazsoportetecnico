@@ -50,7 +50,7 @@
           'items' => [
             ['label' => 'Marcas',           'icon' => 'tag',              'url' => ['/marca']],
             ['label' => 'Modelos (equipos)','icon' => 'layer-group',     'url' => ['/modelo']],
-            ['label' => 'Servicios',        'icon' => 'concierge-bell',   'url' => ['/servicio']],
+            ['label' => 'Servicios/Sectores',        'icon' => 'concierge-bell',   'url' => ['/servicio']],
             ['label' => 'Tipo de equipo',   'icon' => 'tools',            'url' => ['/tipoequipo']],
             ],
           ],
@@ -58,10 +58,9 @@
           ],
           ['label' => 'Administración', 'icon' => 'users-cog', 'iconClassAdded' => 'text-danger',
           'items' => [
-            ['label' => 'Marcas',           'icon' => 'tag',              'url' => ['/marca']],
-            ['label' => 'Modelos (equipos)','icon' => 'layer-group',     'url' => ['/modelo']],
-            ['label' => 'Servicios',        'icon' => 'concierge-bell',   'url' => ['/servicio']],
-            ['label' => 'Tipo de equipo',   'icon' => 'tools',            'url' => ['/tipoequipo']],
+            ['label' => 'Usuarios',           'icon' => 'tag',              'url' => ['/usuario']],
+            ['label' => 'controlacceso','icon' => 'layer-group',     'url' => ['/site/controlacceso']],
+            ['label' => 'Auditoria',        'icon' => 'concierge-bell',   'url' => ['/auditoria']],
           ],
         ],
 

@@ -1,6 +1,6 @@
 <?php
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use yii\bootstrap4\ActiveForm; //used to enable bootstrap layout options
 use kartik\datecontrol\DateControl;
 use kartik\widgets\DatePicker;
 use kartik\select2\Select2;
@@ -13,15 +13,43 @@ use yii\widgets\MaskedInput;
 
 ?>
 
-<div class="equipo-form">
 
   <div class="equipo-form">
 
       <?php $form = ActiveForm::begin(); ?>
+      <div class="row">
+        <div class="col-md-6">
+            <?= $form->field($model, 'id_tipoequipo')->widget(Select2::classname(), [
+                'data' => $arrayHelper['tipoequipos'],
+                'options' => ['placeholder' => 'Seleccione un tipo de equipo...'],
+                'pluginOptions' => ['allowClear' => true],
+                'pluginEvents' => [],  // Vacío
+
+            ])->label("Tipo de equipo");
+
+             ?>
+        </div>
+          <div class="col-md-6">
+            <?= $form->field($model, 'id_marca')->dropDownList(
+                $arrayHelper['marcas'],
+                ['id'=>'id_marca', 'prompt'=>'- Seleccionar marca']
+            )->label('Marca'); ?>
+
+          </div>
+      </div>
 
       <div class="row">
           <div class="col-md-6">
-              <?= $form->field($model, 'nserie')->textInput() ?>
+            <?= $form->field($model, 'id_modelo')->widget(DepDrop::classname(), [
+                'data'=> $arrayHelper['modelos'],
+                'options'=>['id'=>'id_modelo',    'placeholder' => 'Seleccionar modelo...'],
+                'select2Options'=>['pluginOptions'=>['allowClear'=>true]],
+                'pluginOptions'=>[
+                    'depends'=>['id_marca'],
+                    'placeholder'=>'Seleccionar modelo...',
+                    'url'=>Url::to(['/equipo/subcat'])
+                ]
+            ])->label('Modelo'); ?>
           </div>
           <div class="col-md-6">
               <?= $form->field($model, 'codigo')->textInput() ?>
@@ -39,44 +67,18 @@ use yii\widgets\MaskedInput;
 
       <div class="row">
           <div class="col-md-6">
-              <?= $form->field($model, 'id_marca')->dropDownList(
-                  $arrayHelper['marcas'],
-                  ['id'=>'id_marca', 'prompt'=>'- Seleccionar marca']
-              )->label('Marca'); ?>
+            <?= $form->field($model, 'nserie')->textInput() ?>
           </div>
           <div class="col-md-6">
-              <?= $form->field($model, 'id_modelo')->widget(DepDrop::classname(), [
-                  'data'=> $arrayHelper['modelos'],
-                  'options'=>['id'=>'id_modelo'],
-                  'select2Options'=>['pluginOptions'=>['allowClear'=>true]],
-                  'pluginOptions'=>[
-                      'depends'=>['id_marca'],
-                      'placeholder'=>'Seleccionar modelo...',
-                      'url'=>Url::to(['/equipo/subcat'])
-                  ]
-              ])->label('Modelo'); ?>
+            <?= $form->field($model, 'id_servicio')->widget(Select2::classname(), [
+                'data' => $arrayHelper['servicios'],
+                'options' => ['placeholder' => 'Seleccione un servicio...'],
+                'pluginOptions' => ['allowClear' => true],
+                'pluginEvents' => [],  // Vacío
+            ])->label("Servicio/Sector") ?>
           </div>
       </div>
-
-      <div class="row">
-          <div class="col-md-6">
-              <?= $form->field($model, 'id_servicio')->widget(Select2::class, [
-                  'data' => $arrayHelper['servicios'],
-                  'options' => ['placeholder' => 'Seleccione un servicio...'],
-                  'pluginOptions' => ['allowClear' => true],
-              ])->label("Servicio") ?>
-          </div>
-          <div class="col-md-6">
-              <?= $form->field($model, 'id_tipoequipo')->widget(Select2::class, [
-                  'data' => $arrayHelper['tipoequipos'],
-                  'options' => ['placeholder' => 'Seleccione un tipo de equipo...'],
-                  'pluginOptions' => ['allowClear' => true],
-              ])->label("Tipo de equipo") ?>
-          </div>
-      </div>
-
-       <?= $form->field($model, 'operativo')->checkbox() ?>
-       <?= $form->field($model, 'observacion')->textarea(['rows' => 6]) ?>
+       <?= $form->field($model, 'observacion')->textInput() ?>
 
       <?php if (!Yii::$app->request->isAjax){ ?>
           <div class="form-group mt-3">

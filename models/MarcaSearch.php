@@ -59,9 +59,9 @@ class MarcaSearch extends Marca
             'id' => $this->id,
         ]);
 
-        $query->andFilterWhere(['like', 'nombre', $this->nombre])
-            ->andFilterWhere(['like', 'pais', $this->pais])
-            ->andFilterWhere(['like', 'sitioweb', $this->sitioweb]);
+        $query->andFilterWhere(['ilike', 'nombre', $this->nombre])
+            ->andFilterWhere(['ilike', 'pais', $this->pais])
+            ->andFilterWhere(['ilike', 'sitioweb', $this->sitioweb]);
 
         return $dataProvider;
     }

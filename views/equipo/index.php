@@ -15,6 +15,7 @@ $this->title = 'Equipos';
 $this->params['breadcrumbs'][] = $this->title;
 
 CrudAsset::register($this);
+
 $columns[]=    [
         'class' => MyActionColumn::class,
         'template' => '{view} {update} {delete} {attachments} {log}',
@@ -39,7 +40,12 @@ $columns[]=    [
     ];
 
 ?>
-
+<?php
+$this->registerJs("
+    // Fix para permitir escribir en Select2 dentro de modales
+$('#ajaxCrudModal').removeAttr('tabindex');
+");
+?>
 <div class="card">
 
   <!-- Header: título a la izquierda y acciones a la derecha -->
@@ -101,7 +107,6 @@ $columns[]=    [
 
 <?php Modal::begin([
     "id" => "ajaxCrudModal",
-    "size" => Modal::SIZE_LARGE,
     "footer" => "", // necesario para ajaxcrud
 ]) ?>
 <?php Modal::end(); ?>

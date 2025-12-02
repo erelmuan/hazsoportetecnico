@@ -13,7 +13,7 @@ use yii\helpers\ArrayHelper;
  * @property string $nombre
  * @property string|null $pais
  * @property string|null $sitioweb
- *
+ * @property Modelo[] $modelos
  * @property Equipo[] $equipos
  */
 class Marca extends \yii\db\ActiveRecord
@@ -46,8 +46,26 @@ class Marca extends \yii\db\ActiveRecord
         return [
             [['pais', 'sitioweb'], 'default', 'value' => null],
             [['nombre'], 'required'],
+            [['nombre'], 'validarUnicoCaseInsensitive'],
             [['nombre', 'pais', 'sitioweb'], 'string'],
         ];
+    }
+
+    public function validarUnicoCaseInsensitive($attribute)
+    {
+        $valor = mb_strtolower(trim((string)$this->$attribute), 'UTF-8');
+
+        $query = self::find()
+            ->where(new \yii\db\Expression('LOWER(nombre) = :n'), [':n' => $valor]);
+
+        // Cuando es un update, excluir el propio ID
+        if (!$this->isNewRecord) {
+            $query->andWhere(['<>', 'id', $this->id]);
+        }
+
+        if ($query->exists()) {
+            $this->addError($attribute, 'Ya existe un registro con ese nombre (ignorando mayúsculas/minúsculas).');
+        }
     }
 
     /**
@@ -56,10 +74,10 @@ class Marca extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'nombre' => 'Nombre',
-            'pais' => 'Pais',
-            'sitioweb' => 'Sitio web',
+          'id' => Yii::t('app', 'ID'),
+         'nombre' => Yii::t('app', 'Nombre'),
+         'pais' => Yii::t('app', 'Pais'),
+         'sitioweb' => Yii::t('app', 'Sitioweb'),
         ];
     }
 
@@ -79,6 +97,16 @@ class Marca extends \yii\db\ActiveRecord
     }
 
 
+	   /**
+	    * Gets query for [[Modelos]].
+	    *
+	    * @return \yii\db\ActiveQuery
+	    */
+	   public function getModelos()
+	   {
+	       return $this->hasMany(Modelo::class, ['id_marca' => 'id']);
+	   }
+
 
     public static function arrayMarcas(): array {
       $marcas = self::find()
@@ -89,5 +117,10 @@ class Marca extends \yii\db\ActiveRecord
 
         return ArrayHelper::map($marcas, 'id', 'nombre');
     }
+      public function beforeSave($insert){
+      //DE FORMA INDIVIDUAL
+        $this->nombre = strtoupper($this->nombre);
+        return parent::beforeSave($insert);
+      }
 
 }

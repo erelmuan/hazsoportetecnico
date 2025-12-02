@@ -43,9 +43,27 @@ class Tipoequipo extends \yii\db\ActiveRecord
         return [
             [['descripcion'], 'default', 'value' => null],
             [['nombre'], 'required'],
+            [['nombre'], 'validarUnicoCaseInsensitive'],
             [['nombre', 'descripcion'], 'string'],
         ];
     }
+
+    public function validarUnicoCaseInsensitive($attribute)
+{
+    $valor = mb_strtolower(trim((string)$this->$attribute), 'UTF-8');
+
+    $query = self::find()
+        ->where(new \yii\db\Expression('LOWER(nombre) = :n'), [':n' => $valor]);
+
+    // Cuando es un update, excluir el propio ID
+    if (!$this->isNewRecord) {
+        $query->andWhere(['<>', 'id', $this->id]);
+    }
+
+    if ($query->exists()) {
+        $this->addError($attribute, 'Ya existe un registro con ese nombre.');
+    }
+}
 
     /**
      * {@inheritdoc}
@@ -73,4 +91,12 @@ class Tipoequipo extends \yii\db\ActiveRecord
         ,[    'class' => 'text-success','role'=>'modal-remote','title'=>'Datos del paciente','data-toggle'=>'tooltip']
        );
     }
+
+    public function beforeSave($insert){
+    //DE FORMA INDIVIDUAL
+      $this->nombre = strtoupper($this->nombre);
+      return parent::beforeSave($insert);
+    }
+
+
 }

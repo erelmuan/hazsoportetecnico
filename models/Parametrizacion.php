@@ -68,6 +68,7 @@ public static function obtenerColor($fecha, $modelo = self::MODELO_EQUIPO)
         $diferenciaAnos = $diferenciaAnosAbs;
     }
 
+
     // Obtener todas las parametrizaciones activas para el modelo
     $parametrizaciones = self::find()
         ->where(['modelo' => $modelo])
@@ -154,6 +155,7 @@ public static function obtenerColor($fecha, $modelo = self::MODELO_EQUIPO)
             [['tiempo'], 'default', 'value' => null],
             [['tiempo'], 'integer'],
             [['modelo', 'descripcion', 'color', 'tipotiempo', 'condicion'], 'string'],
+            [['tiempo', 'modelo', 'tipotiempo', 'condicion'], 'unique', 'targetAttribute' => ['tiempo', 'modelo', 'tipotiempo', 'condicion']],
             ['modelo', 'in', 'range' => array_keys(self::optsModelo())],
             ['tipotiempo', 'in', 'range' => array_keys(self::optsTipotiempo())],
             ['condicion', 'in', 'range' => array_keys(self::optsCondicion())],

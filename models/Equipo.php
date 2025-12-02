@@ -30,7 +30,7 @@ use yii\helpers\Html;
  * @property Servicio $servicio
  * @property Tipoequipo $tipoequipo
  * @property string|null $observacion
- * @property bool $operativo
+* @property bool|null $operativo
  */
 class Equipo extends \yii\db\ActiveRecord
 {
@@ -53,11 +53,12 @@ class Equipo extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [[ 'id_marca', 'id_modelo', 'id_servicio', 'observacion' ,'ultimo_log'], 'default', 'value' => null],
+            [[ 'id_marca', 'id_modelo', 'id_servicio', 'observacion' ,'ultimo_log' ,'codigo'], 'default', 'value' => null],
             [['id_estado'], 'default', 'value' => 1],
             // Validar formato de fecha si usás strings (opcional)
-            [['nserie', 'codigo', 'id_tipoequipo','operativo'], 'required'],
+            [['nserie',  'id_tipoequipo'], 'required'],
             [['operativo'], 'boolean'],
+            [['operativo'], 'default', 'value' => 1],
             [['nserie', 'codigo', 'observacion'], 'string'],
             [['fechafabricacion', 'fecharegistro'], 'safe'],
             [['id_marca', 'id_modelo', 'id_servicio', 'id_tipoequipo', 'id_estado'], 'default', 'value' => null],
@@ -72,46 +73,6 @@ class Equipo extends \yii\db\ActiveRecord
         ];
     }
 
-
-    /**
-    * Valida que exactamente uno de los dos campos esté presente (no vacío).
-    */
-   public function validateExclusiveDate($attribute, $params)
-   {
-       $hasRegistro = $this->fecharegistro !== null && $this->fecharegistro !== '';
-       $hasFabricacion = $this->fechafabricacion !== null && $this->fechafabricacion !== '';
-       // XOR lógico: verdadero si exactamente uno está presente
-       if (!($hasRegistro xor $hasFabricacion)) {
-           $msg = 'Debe completar exactamente uno de los campos: fecha de registro o fecha de fabricación.';
-           // agrego el error a ambos campos para que el usuario lo vea
-           $this->addError('fecharegistro', $msg);
-           $this->addError('fechafabricacion', $msg);
-       }
-   }
-
-
-    /**
-     * Validador: EXACTAMENTE uno de los dos debe estar presente.
-     */
-    public function validateUnosolo($attribute, $params)
-    {
-        $a = $this->fechafabricacion;
-        $b = $this->fecharegistro;
-
-        // Por seguridad
-        if ($a === '') $a = null;
-        if ($b === '') $b = null;
-
-        $hasA = !empty($a);
-        $hasB = !empty($b);
-
-        if (!($hasA xor $hasB)) {
-            $msg = 'Debe completar exactamente una de las fechas: Fecha de fabricación o Fecha de registro.';
-            // Añadimos el error a ambos campos para que el formulario los marque
-            $this->addError('fechafabricacion', $msg);
-            $this->addError('fecharegistro', $msg);
-        }
-    }
 
     /**
     * Validador que asegura que exactamente uno de los dos campos esté completo.

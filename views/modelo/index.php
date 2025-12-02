@@ -16,6 +16,12 @@ $this->params['breadcrumbs'][] = $this->title;
 CrudAsset::register($this);
 
 ?>
+<?php
+$this->registerJs("
+    // Fix para permitir escribir en Select2 dentro de modales
+$('#ajaxCrudModal').removeAttr('tabindex');
+");
+?>
 <div class="card">
   <!-- Header: título a la izquierda y acciones a la derecha -->
 <div class="card-header d-flex">

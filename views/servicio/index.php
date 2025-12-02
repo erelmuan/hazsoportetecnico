@@ -10,7 +10,7 @@ use hoaaah\ajaxcrud\BulkButtonWidget;
 /* @var $searchModel app\models\ServicioSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::t('app', 'Servicios');
+$this->title = Yii::t('app', 'Servicios/Sector');
 $this->params['breadcrumbs'][] = $this->title;
 
 CrudAsset::register($this);
@@ -30,7 +30,7 @@ CrudAsset::register($this);
           <?= Html::a('<i class="fas fa-plus mr-1"></i>Crear', ['create'], [
               'role' => 'modal-remote',
               'class' => 'btn btn-success btn-sm',
-              'title' => Yii::t('app','Crear equipo')
+              'title' => Yii::t('app','Crear servicio')
           ]) ?>
 
           <?= Html::a('<i class="fas fa-sync-alt mr-1"></i>Refrescar', ['index'], [

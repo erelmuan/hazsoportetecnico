@@ -156,6 +156,7 @@ class Usuario extends ActiveRecord implements IdentityInterface
         if (!parent::beforeSave($insert)) {
             return false;
         }
+        $this->nombreusuario = strtoupper($this->nombreusuario);
 
         if ($insert) {
             if (empty($this->auth_key)) {
@@ -170,4 +171,5 @@ class Usuario extends ActiveRecord implements IdentityInterface
       }
         return true;
     }
+
 }

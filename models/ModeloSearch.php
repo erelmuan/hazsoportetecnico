@@ -64,7 +64,7 @@ class ModeloSearch extends Modelo
             'anio' => $this->anio,
         ]);
 
-        $query->andFilterWhere(['ilike', 'nombre', $this->nombre])
+        $query->andFilterWhere(['ilike', 'modelo.nombre', $this->nombre])
             ->andFilterWhere(['ilike', 'descripcion', $this->descripcion])
             ->andFilterWhere(['ilike', 'marca.nombre', $this->marca]);
 

@@ -17,12 +17,18 @@ return [
         'attribute'=>'observacion',
     ],
     [
-        'class'=>'\kartik\grid\DataColumn',
-        'attribute'=>'tipocategoria',
+        'attribute' => 'tipocategoria',
+        'value' => function($model) {
+            return \app\models\Adjunto::optsTipocategoria()[$model->tipocategoria] ?? $model->tipocategoria;
+        },
+        'filter' => \app\models\Adjunto::optsTipocategoria(),
     ],
     [
-        'class'=>'\kartik\grid\DataColumn',
-        'attribute'=>'tipoarchivo',
+        'attribute' => 'tipoarchivo',
+        'value' => function($model) {
+            return \app\models\Adjunto::optsTipoarchivo()[$model->tipoarchivo] ?? $model->tipoarchivo;
+        },
+        'filter' => \app\models\Adjunto::optsTipoarchivo(),
     ],
     [
         'class' => MyActionColumn::class,

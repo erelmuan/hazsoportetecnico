@@ -62,7 +62,7 @@ class Log extends \yii\db\ActiveRecord
             Equipo::aplicarEstadoDesdeLog($this->id_equipo, $ultimo->id_estado, $ultimo->id);
         } else {
             // No quedan logs: volver al estado pendiente por defecto
-            Equipo::aplicarEstadoDesdeLog($this->id_equipo, EstadoBase::ESTADO_PENDIENTE_REPARACION, null);
+            Equipo::aplicarEstadoDesdeLog($this->id_equipo, EstadoBase::PENDIENTE_DE_REPARACION, null);
         }
 
      }

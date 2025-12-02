@@ -1,11 +1,15 @@
 <?php
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
-use kartik\select2\Select2
+// use yii\widgets\ActiveForm;
+use yii\bootstrap4\ActiveForm; //used to enable bootstrap layout options
+use kartik\select2\Select2;
+use yii\web\JsExpression;
 /* @var $this yii\web\View */
 /* @var $model app\models\Modelo */
 /* @var $form yii\widgets\ActiveForm */
+
 ?>
+
 
 <div class="modelo-form">
 
@@ -17,14 +21,15 @@ use kartik\select2\Select2
 
     <?= $form->field($model, 'anio')->textInput() ?>
 
-
-    <?= $form->field($model, 'id_marca')->widget(Select2::classname(), [
-        'data'=>$marcas,
-        'options'=> ['Seleccion la marca'],
-        'pluginOptions'=>[
-          'allowClear'=> true,
-        ]
-    ]) ; ?>
+    <?=$form->field($model, 'id_marca')->widget(Select2::classname(), [
+        'data' => $marcas,
+        'options' => ['placeholder' => 'Seleccione...'],
+        'pluginOptions' => [
+            'allowClear' => true,
+        ],
+        'pluginEvents' => [],  // Vacío
+    ]);
+    ?>
 
 
 	<?php if (!Yii::$app->request->isAjax){ ?>

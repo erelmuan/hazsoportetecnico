@@ -78,7 +78,7 @@ class AdjuntoSearch extends Adjunto
          // filtros textuales
          $query->andFilterWhere(['ilike', 'nombreoriginal', $this->nombreoriginal])
                ->andFilterWhere(['ilike', 'nombreasignado', $this->nombreasignado])
-               ->andFilterWhere(['ilike', 'observacion', $this->observacion]);
+               ->andFilterWhere(['ilike', 'adjunto.observacion', $this->observacion]);
 
          // PARA ENUMS: usar comparación exacta (NO ILIKE)
          if ($this->tipocategoria !== null && $this->tipocategoria !== '') {
