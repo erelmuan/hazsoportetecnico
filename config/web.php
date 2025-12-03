@@ -7,6 +7,12 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    'name' => 'HAZ SOPORTE TECNICO',
+    // set source language to be English
+    'sourceLanguage' => 'en-US',
+    'language' => 'es-ES',
+    'timeZone' => 'America/Argentina/Buenos_Aires',
+
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
