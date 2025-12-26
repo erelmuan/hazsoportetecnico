@@ -1,3 +1,21 @@
+implementacion en el servidor
+clonar el repositorio
+1. git clone https://github.com/erelmuan/hazsoportetecnico
+
+2. En este caso particular se renombro la carpeta de hazsoportetecnico por backend
+
+2. Se copia la carpeta vendor y los archivos necesarios como web.php y params.php en config en backend
+
+3. En el proyecto desde la consola ejecutar este comando git config core.fileMode false
+Esto es para que cuando aplique los permisos no tome los cambios sobre los permisos de los archivos.
+
+4. cd .. y ejecutar los permisos. sudo chmod 777 -R backend/
+
+5 git status para ver si esta todo bien.
+
+
+
+
 En esta version se incorpora el web service
 CONFIGURACION DE WEB SERVICE:
 
