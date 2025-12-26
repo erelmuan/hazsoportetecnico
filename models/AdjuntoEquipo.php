@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\components\behaviors\AuditoriaBehaviors;
 
 /**
  * This is the model class for table "adjunto_equipo".
@@ -16,7 +17,15 @@ use Yii;
  */
 class AdjuntoEquipo extends \yii\db\ActiveRecord
 {
+  public function behaviors()
+    {
 
+      return array(
+             'AuditoriaBehaviors'=>array(
+                    'class'=>AuditoriaBehaviors::className(),
+                    ),
+        );
+   }
 
     /**
      * {@inheritdoc}

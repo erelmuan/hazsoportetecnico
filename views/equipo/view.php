@@ -49,7 +49,6 @@ use yii\widgets\DetailView;
                     return $model->tipoequipo ? $model->tipoequipo->nombre : '(No asignado)';
                 },
             ],
-          'operativo:boolean',
           'observacion:ntext',
         ],
     ]) ?>

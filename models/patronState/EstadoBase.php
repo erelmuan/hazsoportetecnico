@@ -8,9 +8,11 @@ abstract class EstadoBase implements State
      public const EN_REPARACION = 2; // Estado final para cuando el patólogo termina
      public const REPARADO = 3;
      public const IRREPARABLE = 4;
+     public const ENVIADO_A = 5;
+
 
     protected $modelo;
-     
+
     public function __construct($modelo)
     {
         $this->modelo = $modelo;

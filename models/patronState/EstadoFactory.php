@@ -34,6 +34,7 @@ class EstadoFactory
             'EN REPARACION'    => new EstadoEnReparacion($modelo),
             'REPARADO'         => new EstadoReparado($modelo),
             'IRREPARABLE'       => new EstadoIrreparable($modelo),
+            'ENVIADO A'       => new EstadoEnviadoA($modelo),
             default         => throw new \Exception("Estado no implementado: {$modelo->nombre} (ID: $id)"),
         };
 

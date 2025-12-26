@@ -23,7 +23,8 @@ class LogSearch extends Log
             [['id', 'id_equipo', 'id_estado'], 'integer'],
             ['fechaingreso', 'date', 'format' => 'dd/MM/yyyy'],
             ['fechaegreso', 'date', 'format' => 'dd/MM/yyyy'],
-            [['fechaingreso', 'fechaegreso', 'falla', 'observacion' ,'estado'], 'safe'],
+            [['id', 'id_equipo', 'id_estado', 'id_proveedor'], 'integer'],
+            [['fechaingreso', 'fechaegreso', 'falla', 'observacion'], 'safe'],
         ];
     }
 
@@ -69,6 +70,7 @@ class LogSearch extends Log
             'fechaegreso' => $this->fechaegreso,
             'id_equipo' => $this->id_equipo,
             'id_estado' => $this->id_estado,
+            'id_proveedor' => $this->id_proveedor,
         ]);
 
         $query->andFilterWhere(['ilike', 'falla', $this->falla])

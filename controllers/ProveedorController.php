@@ -3,8 +3,8 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Marca;
-use app\models\MarcaSearch;
+use app\models\Proveedor;
+use app\models\ProveedorSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -12,19 +12,19 @@ use \yii\web\Response;
 use yii\helpers\Html;
 
 /**
- * MarcaController implements the CRUD actions for Marca model.
+ * ProveedorController implements the CRUD actions for Proveedor model.
  */
-class MarcaController extends BaseController
+class ProveedorController extends BaseController
 {
-  // behaviors heredado
+
 
     /**
-     * Lists all Marca models.
+     * Lists all Proveedor models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new MarcaSearch();
+        $searchModel = new ProveedorSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -35,7 +35,7 @@ class MarcaController extends BaseController
 
 
     /**
-     * Displays a single Marca model.
+     * Displays a single Proveedor model.
      * @param integer $id
      * @return mixed
      */
@@ -45,11 +45,12 @@ class MarcaController extends BaseController
         if($request->isAjax){
             Yii::$app->response->format = Response::FORMAT_JSON;
             return [
-                    'title'=> "Marca #".$id,
+                    'title'=> "Proveedor #".$id,
                     'content'=>$this->renderAjax('view', [
                         'model' => $this->findModel($id),
                     ]),
-                    'footer'=> Html::button('Cerrar',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"])
+                    'footer'=> Html::button('Cerrar',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"]).
+                            Html::a('Editar',['update','id'=>$id],['class'=>'btn btn-primary','role'=>'modal-remote'])
                 ];
         }else{
             return $this->render('view', [
@@ -59,7 +60,7 @@ class MarcaController extends BaseController
     }
 
     /**
-     * Creates a new Marca model.
+     * Creates a new Proveedor model.
      * For ajax request will return json object
      * and for non-ajax request if creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
@@ -67,7 +68,7 @@ class MarcaController extends BaseController
     public function actionCreate()
     {
         $request = Yii::$app->request;
-        $model = new Marca();
+        $model = new Proveedor();
 
         if($request->isAjax){
             /*
@@ -76,7 +77,7 @@ class MarcaController extends BaseController
             Yii::$app->response->format = Response::FORMAT_JSON;
             if($request->isGet){
                 return [
-                    'title'=> "Crear nueva Marca",
+                    'title'=> "Crear nuevo Proveedor",
                     'content'=>$this->renderAjax('create', [
                         'model' => $model,
                     ]),
@@ -87,15 +88,15 @@ class MarcaController extends BaseController
             }else if($model->load($request->post()) && $model->save()){
                 return [
                     'forceReload'=>'#crud-datatable-pjax',
-                    'title'=> "Crear nueva Marca",
-                    'content'=>'<span class="text-success">Marca creada con éxito</span>',
+                    'title'=> "Crear nuevo Proveedor",
+                    'content'=>'<span class="text-success">Proveedor creado con exito</span>',
                     'footer'=> Html::button('Cerrar',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"]).
                             Html::a('Crear más',['create'],['class'=>'btn btn-primary','role'=>'modal-remote'])
 
                 ];
             }else{
                 return [
-                    'title'=> "Crear nueva Marca",
+                    'title'=> "Crear nuevo Proveedor",
                     'content'=>$this->renderAjax('create', [
                         'model' => $model,
                     ]),
@@ -120,7 +121,7 @@ class MarcaController extends BaseController
     }
 
     /**
-     * Updates an existing Marca model.
+     * Updates an existing Proveedor model.
      * For ajax request will return json object
      * and for non-ajax request if update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
@@ -138,7 +139,7 @@ class MarcaController extends BaseController
             Yii::$app->response->format = Response::FORMAT_JSON;
             if($request->isGet){
                 return [
-                    'title'=> "Actualizar Marca #".$id,
+                    'title'=> "Actualizar Proveedor #".$id,
                     'content'=>$this->renderAjax('update', [
                         'model' => $model,
                     ]),
@@ -148,7 +149,7 @@ class MarcaController extends BaseController
             }else if($model->load($request->post()) && $model->save()){
                 return [
                     'forceReload'=>'#crud-datatable-pjax',
-                    'title'=> "Marca #".$id,
+                    'title'=> "Proveedor #".$id,
                     'content'=>$this->renderAjax('view', [
                         'model' => $model,
                     ]),
@@ -157,7 +158,7 @@ class MarcaController extends BaseController
                 ];
             }else{
                  return [
-                    'title'=> "Actualizar Marca #".$id,
+                    'title'=> "Actualizar Proveedor #".$id,
                     'content'=>$this->renderAjax('update', [
                         'model' => $model,
                     ]),
@@ -179,18 +180,16 @@ class MarcaController extends BaseController
         }
     }
 
-//delete heredado
-
     /**
-     * Finds the Marca model based on its primary key value.
+     * Finds the Proveedor model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Marca the loaded model
+     * @return Proveedor the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Marca::findOne($id)) !== null) {
+        if (($model = Proveedor::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

@@ -146,6 +146,7 @@ CSS
 
 <?php Modal::begin([
     "id" => "ajaxCrudModal",
+    'size'=>Modal::SIZE_LARGE,
     "footer" => "", // necesario para ajaxcrud
 ]) ?>
 <?php Modal::end(); ?>

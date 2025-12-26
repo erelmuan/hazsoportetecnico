@@ -15,57 +15,15 @@ use app\components\behaviors\AuditoriaBehaviors;
  * @property string|null $observacion
  * @property int $id_equipo
  * @property int $id_estado
- *
+ * @property int|null $id_proveedor
  * @property Equipo $equipo
  * @property Estado $estado
+ * @property Proveedor $proveedor
+ * @property Contactohistorico[] $contactohistoricos
  */
 class Log extends \yii\db\ActiveRecord
 {
 
-  public function afterSave($insert, $changedAttributes)
-   {
-       parent::afterSave($insert, $changedAttributes);
-       // Tras crear o actualizar, aseguramos que el equipo tenga el estado más reciente
-       $this->cambiarEstadoEquipoSave();
-   }
-  private function cambiarEstadoEquipoSave(){
-
-    $ultimo = self::find()
-            ->where(['id_equipo' => $this->id_equipo])
-            ->orderBy(['fechaingreso' => SORT_DESC, 'id' => SORT_DESC])
-            ->limit(1)
-            ->one();
-
-        // Si este registro es el último, aplicamos su estado al equipo
-        if ($ultimo && $ultimo->id === $this->id) {
-            Equipo::aplicarEstadoDesdeLog($this->id_equipo, $this->id_estado, $this->id);
-        }
-  }
-
-
-   public function afterDelete()
-   {
-       parent::afterDelete();
-       // Tras borrar, recalculamos el estado del equipo
-       $this->cambiarEstadoEquipoDelete();
-   }
-
-   private function cambiarEstadoEquipoDelete(){
-     // Buscar el último log restante
-        $ultimo = self::find()
-            ->where(['id_equipo' => $this->id_equipo])
-            ->orderBy(['fechaingreso' => SORT_DESC, 'id' => SORT_DESC])
-            ->limit(1)
-            ->one();
-
-        if ($ultimo) {
-            Equipo::aplicarEstadoDesdeLog($this->id_equipo, $ultimo->id_estado, $ultimo->id);
-        } else {
-            // No quedan logs: volver al estado pendiente por defecto
-            Equipo::aplicarEstadoDesdeLog($this->id_equipo, EstadoBase::PENDIENTE_DE_REPARACION, null);
-        }
-
-     }
 
   public function behaviors()
     {
@@ -95,117 +53,166 @@ class Log extends \yii\db\ActiveRecord
             [['fechaingreso', 'falla', 'id_equipo', 'id_estado'], 'required'],
             [['fechaingreso', 'fechaegreso'], 'safe'],
             [['falla', 'observacion'], 'string'],
-            [['id_equipo', 'id_estado'], 'default', 'value' => null],
-            [['id_equipo', 'id_estado'], 'integer'],
+            // [[ 'id_proveedor'], 'default', 'value' => null],
+            [
+                'id_proveedor',
+                'required',
+                'when' => function ($model) {
+                    return $model->id_estado == EstadoBase::ENVIADO_A;
+                },
+                'whenClient' => "function (attribute, value) {
+                    return $('#estado-log').val() == " . EstadoBase::ENVIADO_A . ";
+                }",
+                'message' => 'Debe elegir un proveedor cuando el estado es ENVIADO'
+            ],
+            [['id_equipo', 'id_estado', 'id_proveedor'], 'integer'],
             [['id_equipo'], 'exist', 'skipOnError' => true, 'targetClass' => Equipo::class, 'targetAttribute' => ['id_equipo' => 'id']],
             [['id_estado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['id_estado' => 'id']],
+            [['id_proveedor'], 'exist', 'skipOnError' => true, 'targetClass' => Proveedor::class, 'targetAttribute' => ['id_proveedor' => 'id']],
             [['fechaingreso','fechaegreso'], 'validarSuperposicion' ,'skipOnEmpty'=>false ],
-                    ['id_estado', 'validarEstado'],
-        ];
+            ['id_estado', 'validarEstado'],
+              ];
     }
+
 
 
     public function validarEstado($attribute, $params)
     {
         // Asegurate de que las constantes sean del mismo tipo (int/string)
-        if ($this->id_estado == EstadoBase::REPARADO || $this->id_estado == EstadoBase::IRREPARABLE) {
+        if ($this->id_estado == EstadoBase::REPARADO || $this->id_estado == EstadoBase::IRREPARABLE ) {
             // Si no hay fecha de egreso, agregamos error
             if (empty($this->fechaegreso)) {
                 // Mostrar el error en el campo fechaegreso (más intuitivo)
                 $this->addError('fechaegreso', 'Para transicionar a este estado debe tener fecha de egreso.');
             }
         }
-        if ($this->id_estado == EstadoBase::PENDIENTE_DE_REPARACION && !empty($this->fechaegreso)){
-          $this->addError('id_estado', 'PENDIENTE EN REPARACION no puede tener fecha de egreso.');
+        if (($this->id_estado == EstadoBase::EN_REPARACION || $this->id_estado == EstadoBase::PENDIENTE_DE_REPARACION || $this->id_estado == EstadoBase::ENVIADO_A) && !empty($this->fechaegreso)){
+          $this->addError('id_estado', "{$this->estado->nombre} no puede tener fecha de egreso.");
 
         }
     }
 
     /**
-     * Validador para evitar superposición de logs (formato de fecha sin hora).
-     */
-    public function validarSuperposicion($attribute, $params)
-    {
-        // Requerimos id_equipo y fechaingreso para validar
-        if (empty($this->id_equipo) || empty($this->fechaingreso)) {
-            return;
-        }
+   * Validador para evitar superposición de logs (formato de fecha sin hora).
+   * Cambiado para que la comparación final sea estricta: other.end > thisStart
+   * (es decir, si other.end == thisStart NO se considera solapamiento).
+   */
+  public function validarSuperposicion($attribute, $params)
+  {
+      if (empty($this->id_equipo) || empty($this->fechaingreso)) {
+          return;
+      }
 
-        // Helper: parsear fecha que puede venir 'd/m/Y' o 'Y-m-d'
-        $parseDate = function($value) {
-            $value = trim($value);
-            if ($value === '') return null;
-            // detectar formato con slash (d/m/Y)
-            if (strpos($value, '/') !== false) {
-                $d = \DateTime::createFromFormat('d/m/Y', $value);
-                if ($d) return $d->setTime(0,0,0);
-                // intentar formatos alternativos
-                $d = \DateTime::createFromFormat('d-m-Y', $value);
-                if ($d) return $d->setTime(0,0,0);
-                return null;
-            }
-            // intentar Y-m-d
-            $d = \DateTime::createFromFormat('Y-m-d', $value);
-            if ($d) return $d->setTime(0,0,0);
-            // intentar parseo libre (último recurso)
-            try {
-                $d = new \DateTime($value);
-                return $d->setTime(0,0,0);
-            } catch (\Exception $e) {
-                return null;
-            }
-        };
+      $parseDate = function($value) {
+          $value = trim((string)$value);
+          if ($value === '') return null;
+          if (strpos($value, '/') !== false) {
+              $d = \DateTime::createFromFormat('d/m/Y', $value);
+              if ($d) return $d->setTime(0,0,0);
+              $d = \DateTime::createFromFormat('d-m-Y', $value);
+              if ($d) return $d->setTime(0,0,0);
+              return null;
+          }
+          $d = \DateTime::createFromFormat('Y-m-d', $value);
+          if ($d) return $d->setTime(0,0,0);
+          try {
+              $d = new \DateTime($value);
+              return $d->setTime(0,0,0);
+          } catch (\Exception $e) {
+              return null;
+          }
+      };
 
-        // Parsear ingreso
-        $fechaIngresoObj = $parseDate($this->fechaingreso);
-        if (!$fechaIngresoObj) {
-            $this->addError('fechaingreso', 'Fecha de ingreso inválida (esperado d/m/Y o Y-m-d).');
-            return;
-        }
+      $fechaIngresoObj = $parseDate($this->fechaingreso);
+      if (!$fechaIngresoObj) {
+          $this->addError('fechaingreso', 'Fecha de ingreso inválida (esperado d/m/Y o Y-m-d).');
+          return;
+      }
 
-        // Parsear egreso (puede ser null)
-        $fechaEgresoObj = null;
-        if (!empty($this->fechaegreso)) {
-            $fechaEgresoObj = $parseDate($this->fechaegreso);
-            if (!$fechaEgresoObj) {
-                $this->addError('fechaegreso', 'Fecha de egreso inválida (esperado d/m/Y o Y-m-d).');
-                return;
-            }
-        }
+      $fechaEgresoObj = null;
+      if (!empty($this->fechaegreso)) {
+          $fechaEgresoObj = $parseDate($this->fechaegreso);
+          if (!$fechaEgresoObj) {
+              $this->addError('fechaegreso', 'Fecha de egreso inválida (esperado d/m/Y o Y-m-d).');
+              return;
+          }
+      }
 
-        // 1) coherencia interna: egreso >= ingreso (si existe egreso)
-        if ($fechaEgresoObj !== null && $fechaEgresoObj < $fechaIngresoObj) {
-            $this->addError('fechaegreso', 'La fecha de egreso debe ser mayor o igual a la fecha de ingreso.');
-            return;
-        }
+      // coherencia interna: si existe egreso, debe ser >= ingreso (o si querés estrictamente >, cambiar aquí)
+      if ($fechaEgresoObj !== null && $fechaEgresoObj < $fechaIngresoObj) {
+          $this->addError('fechaegreso', 'La fecha de egreso debe ser mayor o igual a la fecha de ingreso.');
+          return;
+      }
 
-        // convertir a strings 'Y-m-d' para comparar en SQL
-        $thisStart = $fechaIngresoObj->format('Y-m-d');
-        $thisEnd   = $fechaEgresoObj ? $fechaEgresoObj->format('Y-m-d') : '9999-12-31';
+      // convertir a formato Y-m-d (solo fecha) para comparar en SQL
+      $thisStart = $fechaIngresoObj->format('Y-m-d');
+      $thisEnd   = $fechaEgresoObj ? $fechaEgresoObj->format('Y-m-d') : '9999-12-31';
 
-        // Consulta: buscar otro log del mismo equipo cuya ventana [start,end] se solape
-        // Condición de solapamiento para fechas (sin tiempo):
-        // other.start <= thisEnd AND (other.end IS NULL OR other.end >= thisStart)
-        $query = Log::find()
-            ->where(['id_equipo' => $this->id_equipo])
-            ->andWhere(['<=', 'fechaingreso', $thisEnd])
-            ->andWhere(new \yii\db\Expression("COALESCE(fechaegreso, '9999-12-31') >= :thisStart"), [':thisStart' => $thisStart]);
+      // Query para encontrar cualquier log del mismo equipo que *solape* con [thisStart, thisEnd]
+      // Condición de solapamiento adaptada a comparación estricta en el límite superior:
+      // other.start <= thisEnd AND COALESCE(other.end, '9999-12-31') > thisStart
+      $query = \app\models\Log::find()
+          ->where(['id_equipo' => $this->id_equipo])
+          ->andWhere(['<=', 'fechaingreso', $thisEnd])
+          ->andWhere(new \yii\db\Expression("COALESCE(fechaegreso, '9999-12-31') > :thisStart", [':thisStart' => $thisStart]));
 
-        if (!$this->isNewRecord) {
-            $query->andWhere(['<>', 'id', $this->id]);
-        }
+      if (!$this->isNewRecord) {
+          $query->andWhere(['<>', 'id', $this->id]);
+      }
 
-        // obtener el registro conflictivo (si existe) para mensaje
-        $conflict = $query->one();
-        if ($conflict) {
-            // construir mensaje con información útil (fecha y id)
-            $otherStart = $conflict->fechaingreso;
-            $otherEnd = $conflict->fechaegreso ?: 'abierto';
-            $this->addError('fechaingreso', "La fecha de ingreso se superpone con el registro (ID: {$conflict->id}) " .
-                "con rango {$otherStart} — {$otherEnd}.");
-        }
+      $conflict = $query->one();
+      if ($conflict) {
+          $otherStart = $conflict->fechaingreso;
+          $otherEnd = $conflict->fechaegreso ?: 'abierto';
+          $this->addError('fechaingreso', "La fecha de ingreso se solapa con el registro (ID: {$conflict->id}) " .
+              "con rango {$otherStart} — {$otherEnd}.");
+      }
+  }
+
+    public function afterSave($insert, $changedAttributes)
+     {
+         parent::afterSave($insert, $changedAttributes);
+         // Tras crear o actualizar, aseguramos que el equipo tenga el estado más reciente
+         $this->cambiarEstadoEquipoSave();
+     }
+    private function cambiarEstadoEquipoSave(){
+
+      $ultimo = self::find()
+              ->where(['id_equipo' => $this->id_equipo])
+              ->orderBy(['fechaingreso' => SORT_DESC, 'id' => SORT_DESC])
+              ->limit(1)
+              ->one();
+
+          // Si este registro es el último, aplicamos su estado al equipo
+          if ($ultimo && $ultimo->id === $this->id) {
+              Equipo::aplicarEstadoDesdeLog($this->id_equipo, $this->id_estado, $this->id);
+          }
     }
 
+
+     public function afterDelete()
+     {
+         parent::afterDelete();
+         // Tras borrar, recalculamos el estado del equipo
+         $this->cambiarEstadoEquipoDelete();
+     }
+
+     private function cambiarEstadoEquipoDelete(){
+       // Buscar el último log restante
+          $ultimo = self::find()
+              ->where(['id_equipo' => $this->id_equipo])
+              ->orderBy(['fechaingreso' => SORT_DESC, 'id' => SORT_DESC])
+              ->limit(1)
+              ->one();
+
+          if ($ultimo) {
+              Equipo::aplicarEstadoDesdeLog($this->id_equipo, $ultimo->id_estado, $ultimo->id);
+          } else {
+              // No quedan logs: volver al estado pendiente por defecto
+              Equipo::aplicarEstadoDesdeLog($this->id_equipo, EstadoBase::PENDIENTE_DE_REPARACION, null);
+          }
+
+       }
 
 
     /**
@@ -221,6 +228,7 @@ class Log extends \yii\db\ActiveRecord
             'observacion' => Yii::t('app', 'Observacion'),
             'id_equipo' => Yii::t('app', 'Id Equipo'),
             'id_estado' => Yii::t('app', 'Estado'),
+            'id_proveedor' => Yii::t('app', 'Proveedor'),
         ];
     }
 
@@ -243,5 +251,24 @@ class Log extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Estado::class, ['id' => 'id_estado']);
     }
+
+    /**
+     * Gets query for [[Proveedor]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProveedor()
+    {
+        return $this->hasOne(Proveedor::class, ['id' => 'id_proveedor']);
+    }
+    /**
+    * Gets query for [[Contactohistoricos]].
+    *
+    * @return \yii\db\ActiveQuery
+    */
+   public function getContactohistoricos()
+   {
+       return $this->hasMany(Contactohistorico::class, ['id_log' => 'id']);
+   }
 
 }

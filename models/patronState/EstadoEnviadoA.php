@@ -1,30 +1,24 @@
 <?php
 namespace app\models\patronState;
 
-class EstadoEnReparacion extends EstadoBase
+class EstadoEnviadoA extends EstadoBase
 {
     protected function getNombreClave(): string
     {
-        return 'EN REPARACIÓN';
+        return 'ENVIADO A';
     }
 
     protected function getAllowedTransitions(): array
     {
         return [
             EstadoBase::EN_REPARACION,
-            EstadoBase::REPARADO,
             EstadoBase::ENVIADO_A,
+            EstadoBase::REPARADO,
             EstadoBase::IRREPARABLE,
 
 
         ];
     }
-    // public function isValidForEntityType($entityClass): bool
-    // {
-    //     // Por defecto todos los estados son válidos para todas las entidades
-    //     return true;
-    //
-    // }
 
 }
  ?>

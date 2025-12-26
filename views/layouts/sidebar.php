@@ -52,6 +52,7 @@
             ['label' => 'Modelos (equipos)','icon' => 'layer-group',     'url' => ['/modelo']],
             ['label' => 'Servicios/Sectores',        'icon' => 'concierge-bell',   'url' => ['/servicio']],
             ['label' => 'Tipo de equipo',   'icon' => 'tools',            'url' => ['/tipoequipo']],
+            ['label' => 'Proveedor',   'icon' => 'truck',            'url' => ['/proveedor']],
             ],
           ],
           ['label' => 'Parametrización', 'icon' => 'sliders-h','iconClassAdded' => 'text-warning', 'url' => ['/parametrizacion']
@@ -88,7 +89,7 @@
 
           // Ayuda / doc
           ['label' => 'Ayuda', 'header' => true],
-          ['label' => 'Documentación', 'icon' => 'book', 'url' => ['/help/index']],
+          ['label' => 'Documentación', 'icon' => 'book', 'url' => ['/site/documentacion']],
           ['label' => 'Acerca de',     'icon' => 'info-circle', 'url' => ['/site/about']],
 
       ],

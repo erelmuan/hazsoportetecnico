@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\components\behaviors\AuditoriaBehaviors;
 
 /**
  * This is the model class for table "adjunto".
@@ -22,6 +23,16 @@ use Yii;
  */
 class Adjunto extends \yii\db\ActiveRecord
 {
+
+  public function behaviors()
+  {
+
+    return array(
+           'AuditoriaBehaviors'=>array(
+                  'class'=>AuditoriaBehaviors::className(),
+                  ),
+      );
+ }
   public $file; // atributo virtual
 
     /**

@@ -49,26 +49,51 @@ class BaseController extends Controller
           ]);
         }
 
-    public function obtenerTablasQueReferencian($model)
-    {
-        $schema = Yii::$app->db->schema; // Obtener el esquema completo de la base de datos
-        $tablaActual = $model->tableName(); // Obtener el nombre de la tabla del modelo
-        $tablasQueReferencian = [];
-        foreach ($schema->tableSchemas as $tabla) {
-            foreach ($tabla->foreignKeys as $claveForanea) {
-                if ($claveForanea[0] === $tablaActual) {
-                    // Si la clave foránea apunta a la tabla actual
-                    $tablaReferenciadora = $tabla->name;
-                    // Evitar duplicados
-                    if (!in_array($tablaReferenciadora, $tablasQueReferencian)) {
-                        $tablasQueReferencian[] = $tablaReferenciadora;
+        public function obtenerTablasQueReferencian($model)
+        {
+            $db = Yii::$app->db;
+            $schema = $db->schema;
+            $tablaActual = $model->tableName();
+            $pkValor = $model->id;
+
+          //  proveedor	Tabla padre / tabla referenciada
+          //  contacto	Tabla hija / tabla que referencia
+            $tablasQueReferencian = [];
+            //recorre cada tabla de la base de datos
+            foreach ($schema->tableSchemas as $tabla) {
+              //recorre cada foreign key (cada tabla que hace referencia $tabla)
+                foreach ($tabla->foreignKeys as $fk) {
+
+                    // fk[0] => tabla referenciada
+                    if ($fk[0] === $tablaActual) {
+
+                        $tablaReferenciadora = $tabla->name;
+
+                        // fk[column_fk] = column_pk
+                        foreach ($fk as $columnaFk => $columnaPk) {
+
+                            // salteamos el índice 0
+                            if ($columnaFk === 0) {
+                                continue;
+                            }
+
+                            $count = (int) $db->createCommand(
+                                "SELECT COUNT(*) FROM {$tablaReferenciadora} WHERE {$columnaFk} = :id"
+                            )
+                            ->bindValue(':id', $pkValor)
+                            ->queryScalar();
+
+                            if ($count === 1) {
+                                $tablasQueReferencian[] = $tablaReferenciadora;
+                            }
+                        }
                     }
                 }
             }
+
+            return array_unique($tablasQueReferencian);
         }
 
-        return array_unique($tablasQueReferencian); // Retorna un array sin duplicados
-    }
 
     /**
      * Delete an existing Paciente model.

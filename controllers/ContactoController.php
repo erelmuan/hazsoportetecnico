@@ -3,39 +3,41 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Marca;
-use app\models\MarcaSearch;
+use app\models\Contacto;
+use app\models\ContactoSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use \yii\web\Response;
 use yii\helpers\Html;
+use app\models\Proveedor;
 
 /**
- * MarcaController implements the CRUD actions for Marca model.
+ * ContactoController implements the CRUD actions for Contacto model.
  */
-class MarcaController extends BaseController
+class ContactoController extends BaseController
 {
-  // behaviors heredado
+
 
     /**
-     * Lists all Marca models.
+     * Lists all Contacto models.
      * @return mixed
      */
-    public function actionIndex()
+    public function actionIndex( $id_proveedor)
     {
-        $searchModel = new MarcaSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
+        $searchModel = new ContactoSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id_proveedor);
+        $model_proveedor = Proveedor::findOne(['id'=>$id_proveedor]);
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'model_proveedor'=> $model_proveedor
         ]);
     }
 
 
     /**
-     * Displays a single Marca model.
+     * Displays a single Contacto model.
      * @param integer $id
      * @return mixed
      */
@@ -45,11 +47,12 @@ class MarcaController extends BaseController
         if($request->isAjax){
             Yii::$app->response->format = Response::FORMAT_JSON;
             return [
-                    'title'=> "Marca #".$id,
+                    'title'=> "Contacto #".$id,
                     'content'=>$this->renderAjax('view', [
                         'model' => $this->findModel($id),
                     ]),
-                    'footer'=> Html::button('Cerrar',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"])
+                    'footer'=> Html::button('Cerrar',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"]).
+                            Html::a('Editar',['update','id'=>$id],['class'=>'btn btn-primary','role'=>'modal-remote'])
                 ];
         }else{
             return $this->render('view', [
@@ -59,15 +62,17 @@ class MarcaController extends BaseController
     }
 
     /**
-     * Creates a new Marca model.
+     * Creates a new Contacto model.
      * For ajax request will return json object
      * and for non-ajax request if creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreate($id_proveedor)
     {
         $request = Yii::$app->request;
-        $model = new Marca();
+
+        $model = new Contacto();
+        $model->id_proveedor=$id_proveedor;
 
         if($request->isAjax){
             /*
@@ -76,7 +81,7 @@ class MarcaController extends BaseController
             Yii::$app->response->format = Response::FORMAT_JSON;
             if($request->isGet){
                 return [
-                    'title'=> "Crear nueva Marca",
+                    'title'=> "Crear nuevo Contacto",
                     'content'=>$this->renderAjax('create', [
                         'model' => $model,
                     ]),
@@ -87,15 +92,15 @@ class MarcaController extends BaseController
             }else if($model->load($request->post()) && $model->save()){
                 return [
                     'forceReload'=>'#crud-datatable-pjax',
-                    'title'=> "Crear nueva Marca",
-                    'content'=>'<span class="text-success">Marca creada con éxito</span>',
+                    'title'=> "Crear nuevo Contacto",
+                    'content'=>'<span class="text-success">Contacto creado con exito</span>',
                     'footer'=> Html::button('Cerrar',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"]).
                             Html::a('Crear más',['create'],['class'=>'btn btn-primary','role'=>'modal-remote'])
 
                 ];
             }else{
                 return [
-                    'title'=> "Crear nueva Marca",
+                    'title'=> "Crear nuevo Contacto",
                     'content'=>$this->renderAjax('create', [
                         'model' => $model,
                     ]),
@@ -120,7 +125,7 @@ class MarcaController extends BaseController
     }
 
     /**
-     * Updates an existing Marca model.
+     * Updates an existing Contacto model.
      * For ajax request will return json object
      * and for non-ajax request if update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
@@ -138,7 +143,7 @@ class MarcaController extends BaseController
             Yii::$app->response->format = Response::FORMAT_JSON;
             if($request->isGet){
                 return [
-                    'title'=> "Actualizar Marca #".$id,
+                    'title'=> "Actualizar Contacto #".$id,
                     'content'=>$this->renderAjax('update', [
                         'model' => $model,
                     ]),
@@ -148,7 +153,7 @@ class MarcaController extends BaseController
             }else if($model->load($request->post()) && $model->save()){
                 return [
                     'forceReload'=>'#crud-datatable-pjax',
-                    'title'=> "Marca #".$id,
+                    'title'=> "Contacto #".$id,
                     'content'=>$this->renderAjax('view', [
                         'model' => $model,
                     ]),
@@ -157,7 +162,7 @@ class MarcaController extends BaseController
                 ];
             }else{
                  return [
-                    'title'=> "Actualizar Marca #".$id,
+                    'title'=> "Actualizar Contacto #".$id,
                     'content'=>$this->renderAjax('update', [
                         'model' => $model,
                     ]),
@@ -179,18 +184,30 @@ class MarcaController extends BaseController
         }
     }
 
-//delete heredado
+    public function actionByproveedor($id)
+  {
+      Yii::$app->response->format = Response::FORMAT_JSON;
 
+      return Contacto::find()
+          ->select(['id', 'nombre', 'cargo', 'email'])
+          ->where(['id_proveedor' => $id])
+          ->orderBy(['nombre' => SORT_ASC])
+          ->asArray()
+          ->all();
+  }
+
+
+  //delete heredado
     /**
-     * Finds the Marca model based on its primary key value.
+     * Finds the Contacto model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Marca the loaded model
+     * @return Contacto the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Marca::findOne($id)) !== null) {
+        if (($model = Contacto::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

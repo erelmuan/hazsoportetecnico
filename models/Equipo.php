@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use DateTime;
 use yii\helpers\Html;
+use app\components\behaviors\AuditoriaBehaviors;
 
 /**
  * This is the model class for table "equipo".
@@ -30,13 +31,21 @@ use yii\helpers\Html;
  * @property Servicio $servicio
  * @property Tipoequipo $tipoequipo
  * @property string|null $observacion
-* @property bool|null $operativo
  */
+
 class Equipo extends \yii\db\ActiveRecord
 {
 
 
+  public function behaviors()
+  {
 
+    return array(
+           'AuditoriaBehaviors'=>array(
+                  'class'=>AuditoriaBehaviors::className(),
+                  ),
+      );
+ }
 
 
     /**
@@ -161,10 +170,9 @@ class Equipo extends \yii\db\ActiveRecord
             'id_marca' => Yii::t('app', 'Id Marca'),
             'id_modelo' => Yii::t('app', 'Id Modelo'),
             'id_servicio' => Yii::t('app', 'Id Servicio'),
-            'id_tipoequipo' => Yii::t('app', 'Id Tipo de equipo'),
+            'id_tipoequipo' => Yii::t('app', 'Tipo de equipo'),
             'id_estado' => Yii::t('app', 'Id Estado'),
             'observacion' => Yii::t('app', 'Observación'),
-            'operativo' => Yii::t('app', 'Operativo'),
             'ultimo_log' => Yii::t('app', 'Último Log'),
         ];
     }
@@ -281,18 +289,7 @@ class Equipo extends \yii\db\ActiveRecord
            'class'=>'\kartik\grid\DataColumn',
            'attribute'=>'observacion',
        ],
-       [
-           'class'=>'\kartik\grid\BooleanColumn',
-           'attribute'=>'operativo',
-           'trueLabel' => 'Sí',
-           'falseLabel' => 'No',
-           'trueIcon' => '<span class="label label-success" ">Sí</span>',
-           'falseIcon' => '<span class="label label-danger" ">No</span>',
-           'filterInputOptions' => [
-              'class' => 'form-control',
-               'prompt' => 'Seleccionar'
-            ],
-       ]
+
    ];
 
 

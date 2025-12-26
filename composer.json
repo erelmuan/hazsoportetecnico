@@ -35,7 +35,8 @@
         "kartik-v/yii2-widget-depdrop": "@dev",
         "yii2mod/yii2-rbac": "*",
         "kartik-v/yii2-widget-growl": "dev-master",
-        "kartik-v/yii2-widget-colorinput": "dev-master"
+        "kartik-v/yii2-widget-colorinput": "dev-master",
+        "wbraganca/yii2-dynamicform": "^2.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

@@ -124,6 +124,15 @@ class SiteController extends Controller
             'model' => $model,
         ]);
     }
+    public function actionTutorials()
+    {
+        return $this->render('tutorials');
+    }
+    public function actionDocumentacion()
+    {
+        return $this->render('documentacion');
+    }
+
 
     /**
      * Displays about page.
@@ -132,6 +141,29 @@ class SiteController extends Controller
      */
     public function actionAbout()
     {
-        return $this->render('about');
+      // Datos que se muestran (puedes llevarlos a params.php)
+    $info = [
+        'appName'     => Yii::$app->name,
+        'version'     => '1.3.0',                 // actualizalo según corresponda
+        'releaseDate' => '2025-12-22',
+        'author'      => 'Equipo de TI - Hospital X',
+        'contact'     => 'soporte@hospitalx.example',
+        'license'     => 'GPLv3',
+        'tech'        => [
+            'PHP ' . PHP_VERSION,
+            'Yii2 Framework',
+            'PostgreSQL',
+            'Bootstrap / AdminLTE'
+        ],
+        'links' => [
+            ['label' => 'Tutoriales rápidos', 'url' => 'tutorials'],
+            ['label' => 'Documentación', 'url' => '/help/index'],
+            ['label' => 'Contacto soporte', 'url' => 'mailto:soporte@hospitalx.example'],
+        ],
+    ];
+
+    return $this->render('about', [
+        'info' => $info,
+    ]);
     }
 }

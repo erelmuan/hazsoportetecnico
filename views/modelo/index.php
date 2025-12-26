@@ -72,10 +72,6 @@ $('#ajaxCrudModal').removeAttr('tabindex');
               'striped' => true,
               'condensed' => true,
               'responsive' => true,
-              'striped' => true,
-              'condensed' => true,
-              'responsive' => true,
-              'columns' => require(__DIR__.'/_columns.php'),
               'summaryOptions' => ['class' => 'text-muted small mb-2'],
           ])?>
       </div>

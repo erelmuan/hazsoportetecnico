@@ -15,6 +15,7 @@ class EstadoPendienteDeReparacion extends EstadoBase
           EstadoBase::EN_REPARACION,
           EstadoBase::REPARADO,
           EstadoBase::IRREPARABLE,
+          EstadoBase::ENVIADO_A,
 
 
         ];
