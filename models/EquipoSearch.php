@@ -17,7 +17,7 @@ class EquipoSearch extends Equipo
  public $tipoequipo;
  public $servicio;
  public $estado;
- 
+
     /**
      * @inheritdoc
      */
@@ -52,13 +52,16 @@ class EquipoSearch extends Equipo
      */
     public function search($params)
     {
-        $query = Equipo::find()
-        ->innerJoinWith('tipoequipo',true)
-        ->leftJoin('marca', 'marca.id = equipo.id_marca')
-        ->leftJoin('modelo', 'modelo.id = equipo.id_modelo')
-        ->leftJoin('servicio', 'servicio.id = equipo.id_servicio')
-        ->leftJoin('estado', 'estado.id = equipo.id_estado');
-        // ->orderBy(['equipo.id' => SORT_DESC]);
+      $query = Equipo::find()
+      ->select(['equipo.*'])
+      ->innerJoinWith('tipoequipo',true)
+      ->leftJoin('marca', 'marca.id = equipo.id_marca')
+      ->leftJoin('modelo', 'modelo.id = equipo.id_modelo')
+      ->leftJoin('servicio', 'servicio.id = equipo.id_servicio')
+      ->leftJoin('estado', 'estado.id = equipo.id_estado')
+      ->distinct();                     // <-- elimina filas duplicadas
+
+      // ->orderBy(['equipo.id' => SORT_DESC]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
