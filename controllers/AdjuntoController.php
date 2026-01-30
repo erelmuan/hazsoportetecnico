@@ -20,16 +20,6 @@ class AdjuntoController extends BaseController
 {
   // behaviors heredado
 
-
-
-
-  // $searchModelOp = clone $searchModel;
-  // $searchModelRef = clone $searchModel;
-  //
-  // $dataProviderOp = $searchModelOp->search($opParams, $model_equipo->id);
-  // $dataProviderRef = $searchModelRef->search($refParams, $model_equipo->id);
-  // $reqParams = Yii::$app->request->queryParams;
-
   public function devolverModelos($id_equipo){
 
     $searchModel = new AdjuntoSearch();
@@ -37,12 +27,12 @@ class AdjuntoController extends BaseController
     $dataProviderOp = $searchModel->search(Yii::$app->request->queryParams ,Adjunto::TIPOCATEGORIA_OPERATIVO,$id_equipo);
     $dataProviderOp ->pagination->pageSize = 7;
     //EVOLUCIONES LOS DEMAS PROFRESIONALES//
-    $dataProviderRef = $searchModel->search(Yii::$app->request->queryParams,Adjunto::TIPOCATEGORIA_REFERENCIA,$id_equipo);
-    $dataProviderRef ->pagination->pageSize = 7;
+    $dataProviderBib = $searchModel->search(Yii::$app->request->queryParams,Adjunto::TIPOCATEGORIA_BIBLIOGRAFIA,$id_equipo);
+    $dataProviderBib ->pagination->pageSize = 7;
     $dataConfig=[
             'searchModel' => $searchModel,
             'dataProviderOp' => $dataProviderOp,
-            'dataProviderRef' => $dataProviderRef ,
+            'dataProviderBib' => $dataProviderBib ,
         ];
     return $dataConfig;
   }
@@ -87,22 +77,7 @@ class AdjuntoController extends BaseController
             ]);
         }
     }
-    private function cargarReferencia($id_adjunto, $id_equipo){
-      $model_adjunto_equipo = new AdjuntoEquipo();
-      $model_adjunto_equipo->id_adjunto=$id_adjunto;
-      $model_adjunto_equipo->id_equipo=$id_equipo;
 
-      if (!$model_adjunto_equipo->save()) {
-        // obtener errores legibles
-        $errors = $model->getFirstErrors();
-        $message = 'No se pudo guardar AdjuntoEquipo: ' . implode('; ', $errors);
-        Yii::error($message, __METHOD__);
-        throw new RuntimeException($message);
-
-      }
-
-      return true;
-    }
     /**
      * Creates a new Adjunto model.
      * For ajax request will return json object
@@ -148,16 +123,19 @@ class AdjuntoController extends BaseController
                      if ($archivo && !$this->subirArchivo($archivo, $model->nombreasignado,$model->tipocategoria)) {
                          throw new \Exception('Error al subir el archivo');
                      }
-                     if($model->tipocategoria===Adjunto::TIPOCATEGORIA_REFERENCIA){
-                       $this->cargarReferencia($model->id, $id_equipo);
-                     }
-                     $transaction->commit();
                      $crud_table='';
-                     if($model->tipocategoria===Adjunto::TIPOCATEGORIA_REFERENCIA){
-                       $crud_table='#crud-datatable-ref-pjax';
-                     }else {
+                     if($model->tipocategoria===Adjunto::TIPOCATEGORIA_BIBLIOGRAFIA){
+                        $equipo= Equipo::findOne($id_equipo);
+                        //  REPLICAR LA BIBLIOGRAFIA A TODOS LOS EQUIPOS QUE TENGA EL MISMO MODELO Y MARCA
+                        $equipo->replicarBibliografia($model->id);
+
+                       $crud_table='#crud-datatable-bib-pjax';
+                     }
+                     else {
                        $crud_table='#crud-datatable-op-pjax';
                      }
+                     $transaction->commit();
+
                      return [
                          'forceReload' => $crud_table,
                          'title' => "Crear nuevo Adjunto",
@@ -184,7 +162,7 @@ class AdjuntoController extends BaseController
      }
 
 
-     public function actionCreatereferencia($id_equipo)
+     public function actionCreatebibliografia($id_equipo)
    {
        $request = Yii::$app->request;
        $model = new AdjuntoEquipo();
@@ -194,8 +172,8 @@ class AdjuntoController extends BaseController
           if ($request->isGet) {
            Yii::$app->response->format = Response::FORMAT_JSON;
            return [
-               'title'   => 'Vincular adjunto referencial',
-               'content' => $this->renderAjax('createreferencia', [
+               'title'   => 'Vincular adjunto bibliografia',
+               'content' => $this->renderAjax('createbibliografia', [
                    'model' => $model,
                    'id_equipo' => $id_equipo,
                ]),
@@ -204,7 +182,6 @@ class AdjuntoController extends BaseController
                            Html::button('Vincular',['class'=>'btn btn-primary', 'id'=>'vincular','type'=>"submit"])
            ];
          }
-
            // POST normal (sin AJAX) - procesar el formulario
            if ($model->load($request->post())) {
                $model->id_equipo = $id_equipo; // Asegurar que tenga el id_equipo
@@ -212,14 +189,14 @@ class AdjuntoController extends BaseController
                    $mensaje='Adjunto vinculado correctamente.';
                    $respuesta="success";
                } else {
-                   $mensaje='No se pudo crear la referencia.';
+                   $mensaje='No se pudo crear la bibliografia.';
                    $respuesta="danger";
 
                }
                Yii::$app->response->format = Response::FORMAT_JSON;
 
                return [
-                   'forceReload'=>'#crud-datatable-ref-pjax',
+                   'forceReload'=>'#crud-datatable-bib-pjax',
                    'title'=> "Devinculación",
                    'content'=>'<span class="text-'.$respuesta.'">'.$mensaje.'</span>',
                    'footer'=> Html::button('Cerrar',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"])
@@ -283,8 +260,8 @@ class AdjuntoController extends BaseController
                 ];
             }else if($model->load($request->post()) && $model->save()){
                 $crud_table='';
-                if($model->tipocategoria===Adjunto::TIPOCATEGORIA_REFERENCIA){
-                  $crud_table='#crud-datatable-ref-pjax';
+                if($model->tipocategoria===Adjunto::TIPOCATEGORIA_BIBLIOGRAFIA){
+                  $crud_table='#crud-datatable-bib-pjax';
                 }else {
                   $crud_table='#crud-datatable-op-pjax';
                 }
@@ -363,7 +340,7 @@ class AdjuntoController extends BaseController
        }
    }
 
-   public function actionDeletereferencia($id, $id_equipo)
+   public function actionDeletebibliografia($id, $id_equipo)
    {
        $request = Yii::$app->request;
        if ($request->isAjax) {
@@ -388,7 +365,7 @@ class AdjuntoController extends BaseController
                $respuesta="danger";
              }
              return [
-                 'forceReload'=>'#crud-datatable-ref-pjax',
+                 'forceReload'=>'#crud-datatable-bib-pjax',
                  'title'=> "Eliminación",
                  'content'=>'<span class="text-'.$respuesta.'">'.$mensaje.'</span>',
                  'footer'=> Html::button('Cerrar',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"])
@@ -419,7 +396,7 @@ class AdjuntoController extends BaseController
            $respuesta="danger";
          }
          return [
-             'forceReload'=>'#crud-datatable-ref-pjax',
+             'forceReload'=>'#crud-datatable-bib-pjax',
              'title'=> "Devinculación",
              'content'=>'<span class="text-'.$respuesta.'">'.$mensaje.'</span>',
              'footer'=> Html::button('Cerrar',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"])

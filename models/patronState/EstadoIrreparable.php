@@ -17,10 +17,7 @@ class EstadoIrreparable extends EstadoBase
       ];
     }
 
-    // public function canTransitionTo($toStateId, $user, $entity = null): bool
-    // {
-    //   return true;
-    // }
+
 
 }
 

@@ -53,7 +53,7 @@ class EquipoSearch extends Equipo
     public function search($params)
     {
       $query = Equipo::find()
-      ->select(['equipo.*'])
+      ->select(['equipo.*, "marca"."nombre","modelo"."nombre", "servicio"."nombre", "tipoequipo"."nombre", "estado"."nombre"'])
       ->innerJoinWith('tipoequipo',true)
       ->leftJoin('marca', 'marca.id = equipo.id_marca')
       ->leftJoin('modelo', 'modelo.id = equipo.id_modelo')

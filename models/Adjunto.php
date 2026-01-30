@@ -39,7 +39,7 @@ class Adjunto extends \yii\db\ActiveRecord
      * ENUM field values
      */
     const TIPOCATEGORIA_OPERATIVO = 'operativo';
-    const TIPOCATEGORIA_REFERENCIA = 'referencia';
+    const TIPOCATEGORIA_BIBLIOGRAFIA = 'bibliografia';
     const TIPOARCHIVO_VIDEO = 'video';
     const TIPOARCHIVO_FOTO = 'foto';
     const TIPOARCHIVO_DOCUMENTO_PDF = 'documento_pdf';
@@ -131,7 +131,7 @@ class Adjunto extends \yii\db\ActiveRecord
     {
         return [
             self::TIPOCATEGORIA_OPERATIVO => Yii::t('app', 'operativo'),
-            self::TIPOCATEGORIA_REFERENCIA => Yii::t('app', 'referencia'),
+            self::TIPOCATEGORIA_BIBLIOGRAFIA => Yii::t('app', 'bibliografia'),
         ];
     }
 
@@ -175,14 +175,14 @@ class Adjunto extends \yii\db\ActiveRecord
     /**
      * @return bool
      */
-    public function isTipocategoriaReferencia()
+    public function isTipocategoriaBibliografia()
     {
-        return $this->tipocategoria === self::TIPOCATEGORIA_REFERENCIA;
+        return $this->tipocategoria === self::TIPOCATEGORIA_BIBLIOGRAFIA;
     }
 
-    public function setTipocategoriaToReferencia()
+    public function setTipocategoriaToBibliografia()
     {
-        $this->tipocategoria = self::TIPOCATEGORIA_REFERENCIA;
+        $this->tipocategoria = self::TIPOCATEGORIA_BIBLIOGRAFIA;
     }
 
     /**

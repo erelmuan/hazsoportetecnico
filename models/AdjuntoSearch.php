@@ -46,7 +46,7 @@ class AdjuntoSearch extends Adjunto
              ->innerJoinWith('equipo', true)
              ->andWhere(['adjunto.id_equipo' => $id_equipo])
              ->orderBy(['adjunto.id' => SORT_DESC]);
-       }if($tipocategoria ===Adjunto::TIPOCATEGORIA_REFERENCIA){
+       }if($tipocategoria ===Adjunto::TIPOCATEGORIA_BIBLIOGRAFIA){
          $query = Adjunto::find()
              ->innerJoinWith('adjuntoEquipos', 'adjuntoEquipos.id_adjunto= adjunto.id  ')
              ->andWhere(['adjunto_equipo.id_equipo' => $id_equipo])

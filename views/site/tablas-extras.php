@@ -82,6 +82,22 @@ use yii\helpers\Html;
             </div>
           </div>
         </div>
+
+
+
+        <!-- Card Tipo de Proveedores -->
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="card shadow border-0 h-100 hover-card">
+            <div class="card-body text-center">
+              <div class="icon-circle mb-3 text-info">
+                <i class="fas fa-truck fa-2x animated-icon"></i>
+              </div>
+              <h6 class="font-weight-bold text-dark">Proveedores</h6>
+              <p class="text-muted small">Gestión de proveedores</p>
+              <a href="<?= Url::to(['/proveedor/index']) ?>" class="btn btn-sm btn-info btn-block text-white">Ingresar</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

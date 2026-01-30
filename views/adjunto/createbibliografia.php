@@ -5,20 +5,20 @@ use yii\helpers\ArrayHelper;
 use app\models\Adjunto;
 use yii\widgets\ActiveForm;
 
-$this->title = 'Vincular adjunto referencial';
-// lista de adjuntos referenciales existentes
+$this->title = 'Vincular adjunto bibliografía';
+// lista de adjuntos bibliografías existentes
 $id_equipo = (int)$id_equipo;
 
-$referenciales = ArrayHelper::map(
+$bibliografias = ArrayHelper::map(
     Adjunto::find()
         ->leftJoin('adjunto_equipo', "adjunto_equipo.id_adjunto = adjunto.id AND adjunto_equipo.id_equipo = {$id_equipo}")
-        ->where(['adjunto.tipocategoria' => Adjunto::TIPOCATEGORIA_REFERENCIA])
+        ->where(['adjunto.tipocategoria' => Adjunto::TIPOCATEGORIA_BIBLIOGRAFIA])
         ->andWhere(['adjunto_equipo.id' => null])
         ->orderBy('adjunto.nombreoriginal')
         ->all(),
     'id',
     'nombreoriginal'
-);                                                                                                                                      
+);
 
 // valor seleccionado del modo (permite mantener la elección tras POST/validación)
 $modoSelected = Yii::$app->request->post('modo', 'buscar'); // 'buscar' o 'subir'
@@ -28,10 +28,10 @@ $adjModel = new \app\models\Adjunto();
 ?>
 
 <?php $form = ActiveForm::begin([
-    'action' => ['adjunto/createreferencia','id_equipo' => $id_equipo],
+    'action' => ['adjunto/createbibliografia','id_equipo' => $id_equipo],
     'options' => [
         'enctype' => 'multipart/form-data',
-        'id' => 'form-referencial',
+        'id' => 'form-bibliografia',
     ],
 ]); ?>
 
@@ -51,10 +51,10 @@ $adjModel = new \app\models\Adjunto();
     <div id="bloque-buscar" class="mb-3" style="<?= $modoSelected === 'buscar' ? '' : 'display:none;' ?>">
         <?= Html::dropDownList('AdjuntoEquipo[id_adjunto]',
             Yii::$app->request->post('AdjuntoEquipo')['id_adjunto'] ?? null,
-            $referenciales, [
+            $bibliografias, [
             'class' => 'form-control',
             'required' => true , // ← Esto hace el campo obligatorio en HTML5
-            'prompt' => '--- seleccionar adjunto referencial existente ---'
+            'prompt' => '--- seleccionar adjunto de bibliografia existente ---'
         ]) ?>
         <div class="small text-muted mt-1">Si seleccionás uno existente se creará la relación con el equipo.</div>
 
@@ -69,7 +69,7 @@ $adjModel = new \app\models\Adjunto();
         <?= Html::button('Subir nuevo adjunto', [
             'class' => 'btn btn-primary btn-open-create-adjunto',
             'role'=>'modal-remote',
-            'data-url' => Url::to(['adjunto/create', 'id_equipo' => $id_equipo ,'tipocategoria'=>'referencia']),
+            'data-url' => Url::to(['adjunto/create', 'id_equipo' => $id_equipo ,'tipocategoria'=>'bibliografia']),
         ]) ?>
         <div id="preview" style="margin-top:10px;"></div>
     </div>
@@ -92,7 +92,7 @@ $adjModel = new \app\models\Adjunto();
   var bloqueSubir = qs('#bloque-subir');
   var fileInput = qs('#adjunto-file');
   var preview = qs('#preview');
-  var form = qs('#form-referencial');
+  var form = qs('#form-bibliografia');
 
   function actualizarModo(){
     var modo = qsa('input[name="modo"]').filter(function(r){ return r.checked; })[0].value;

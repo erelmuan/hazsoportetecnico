@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 CrudAsset::register($this);
 
 $columns = require(__DIR__ . '/_columns.php');
-$columnsRef = require(__DIR__ . '/_columnsRef.php');
+$columnsBlibiografia = require(__DIR__ . '/_columnsBlibiografia.php');
 
 ?>
 
@@ -29,10 +29,10 @@ $columnsRef = require(__DIR__ . '/_columnsRef.php');
               'class' => 'btn btn-success btn-sm',
               'title' => 'Agregar adjunto operativo'
           ]) ?>
-          <?= Html::a('<i class="fas fa-plus mr-1"></i> Referencial', ['adjunto/createreferencia', 'id_equipo'=>$model_equipo->id], [
+          <?= Html::a('<i class="fas fa-plus mr-1"></i> Bibliografía', ['adjunto/createbibliografia', 'id_equipo'=>$model_equipo->id], [
               'role' => 'modal-remote',
               'class' => 'btn btn-primary btn-sm',
-              'title' => 'Agregar adjunto referencia'
+              'title' => 'Agregar adjunto bibliografía'
           ]) ?>
 
           <?= Html::a('<i class="fas fa-sync-alt mr-1"></i> Refrescar', ['index', 'id_equipo' => $model_equipo->id], [
@@ -62,7 +62,7 @@ $columnsRef = require(__DIR__ . '/_columnsRef.php');
             <a class="nav-link active" id="tab-op-link" data-toggle="tab" href="#tab-op" role="tab">Operativo</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="tab-ref-link" data-toggle="tab" href="#tab-ref" role="tab">Referencial</a>
+            <a class="nav-link" id="tab-bib-link" data-toggle="tab" href="#tab-bib" role="tab">Bibliografía</a>
           </li>
       </ul>
 
@@ -98,21 +98,21 @@ $columnsRef = require(__DIR__ . '/_columnsRef.php');
             </div>
           </div>
         </div>
-          <!-- PESTAÑA REFERENCIAL -->
-          <div class="tab-pane fade" id="tab-ref" role="tabpanel">
+          <!-- PESTAÑA BIBLIOGRAFIA -->
+          <div class="tab-pane fade" id="tab-bib" role="tabpanel">
             <div class="adjunto-index">
-                <div id="ajaxCrudDatatableRef">
+                <div id="ajaxCrudDatatableBib">
                   <?= GridView::widget([
-                      'id' => 'crud-datatable-ref',
-                      'dataProvider' => $dataConfig['dataProviderRef'] ,
+                      'id' => 'crud-datatable-bib',
+                      'dataProvider' => $dataConfig['dataProviderBib'] ,
                       'filterModel' => $dataConfig['searchModel'] ,
                       'pjax' => true,
                       'toolbar'=> [
                           ['content'=>
-                              Html::button('<i class="fas fa-plus"></i> Referencial', [
+                              Html::button('<i class="fas fa-plus"></i> Bibliografía', [
                                   'class' => 'btn btn-primary',
                                   'data-toggle' => 'modal',
-                                  'data-target' => '#modal-referencial'
+                                  'data-target' => '#modal-bibliografia'
                               ]).
                               Html::a('<i class="fas fa-sync-alt"></i>', ['adjunto/index','id_equipo'=>$model_equipo->id],
                                   ['data-pjax'=>1, 'class'=>'btn btn-default', 'title'=>'Refrescar']).
@@ -123,7 +123,7 @@ $columnsRef = require(__DIR__ . '/_columnsRef.php');
                       'striped' => true,
                       'condensed' => true,
                       'responsive' => true,
-                      'columns' => $columnsRef,
+                      'columns' => $columnsBlibiografia,
                       'summaryOptions' => ['class' => 'text-muted small mb-2'],
                   ]) ?>
                   </div>

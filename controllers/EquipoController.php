@@ -18,6 +18,7 @@ use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use app\components\Metodos\Metodos;
+use app\models\AdjuntoEquipo;
 
 
 /**
@@ -81,6 +82,10 @@ class EquipoController extends BaseController
       $tipoEquipos = ArrayHelper::map(TipoEquipo::find()->orderBy('nombre')->all(), 'id', 'nombre');
       return ['marcas'=>$marcas,'modelos'=>$modelos,'servicios'=>$servicios,'tipoequipos'=>$tipoEquipos];
   }
+
+
+
+
     /**
      * Creates a new Equipo model.
      * For ajax request will return json object
@@ -91,7 +96,6 @@ class EquipoController extends BaseController
     {
         $request = Yii::$app->request;
         $model = new Equipo();
-        $model->id_estado=EstadoBase::PENDIENTE_DE_REPARACION; //remplazar por una constante
         $arrayHelper= $this->devolverArrayHelper();
         if($request->isAjax){
             /*
@@ -110,6 +114,7 @@ class EquipoController extends BaseController
 
                 ];
             }else if($model->load($request->post()) && $model->save()){
+                $model->sincronizarAdjuntos();
                 return [
                     'forceReload'=>'#crud-datatable-pjax',
                     'title'=> "Crear nuevo Equipo",
@@ -135,6 +140,7 @@ class EquipoController extends BaseController
             *   Process for non-ajax request
             */
             if ($model->load($request->post()) && $model->save()) {
+                $model->sincronizarAdjuntos();
                 return $this->redirect(['view', 'id' => $model->id]);
             } else {
                 return $this->render('create', [

@@ -3,9 +3,14 @@
 # uploads documentos
 /web/uploads
 
+# tests
+tests
+
 # configuracion de la base
 /config/db.php
 /config/params.php
+/config/test_db.php
+
 
 # netbeans project files
 nbproject

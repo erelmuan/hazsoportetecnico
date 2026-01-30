@@ -32,9 +32,9 @@ return [
     ],
     [
         'class' => MyActionColumn::class,
-        'template' => '{view} {update} {deletereferencia} {unlink}',
+        'template' => '{view} {update} {deletebibliografia} {unlink}',
         'buttons' => [
-            'deletereferencia' => function ($url, $model, $key) {
+            'deletebibliografia' => function ($url, $model, $key) {
                 // Obtener el equipo_id desde la URL o desde alguna variable de sesión/parámetro
                 $equipoId = Yii::$app->request->get('id_equipo');
                 // Contar cuántos equipos están relacionados con este adjunto
@@ -45,7 +45,7 @@ return [
                 if ($cantidadRelaciones == 1) {
                   return Html::a(
                       '<span class="btn btn-danger btn-circle btn-sm"><i class="fas fa-trash"></i></span>',
-                      ['deletereferencia', 'id' => $model->id, 'id_equipo' => $equipoId],
+                      ['deletebibliografia', 'id' => $model->id, 'id_equipo' => $equipoId],
                       [
                           'title' => Yii::t('app', 'Eliminar'),
                           'role' => 'modal-remote',

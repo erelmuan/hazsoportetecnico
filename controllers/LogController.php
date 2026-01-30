@@ -286,7 +286,7 @@ class LogController extends BaseController
                    )
                );
 
-               // Validación del Log
+               // Si no pasa la validacion se conserva los valores enviados
                if (!$model->validate()) {
                    return [
                        'title'   => "Actualizar Log #".$id,
