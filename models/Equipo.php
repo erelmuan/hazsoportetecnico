@@ -81,6 +81,7 @@ class Equipo extends \yii\db\ActiveRecord
             [['fechafabricacion', 'fecharegistro'], 'safe'],
             [['id_marca', 'id_modelo', 'id_servicio', 'id_tipoequipo', 'id_estado'], 'default', 'value' => null],
             [['id_marca', 'id_modelo', 'id_servicio', 'id_tipoequipo', 'id_estado' ,'ultimo_log'], 'integer'],
+            [['nserie', 'id_marca', 'id_modelo', 'id_tipoequipo'], 'unique', 'targetAttribute' => ['nserie', 'id_marca', 'id_modelo', 'id_tipoequipo'] ,'message'=>'Esta combinación (número de serie, marca, modelo y tipo) ya existe. No se permiten registros duplicados'],
             [['id_estado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['id_estado' => 'id']],
             [['id_marca'], 'exist', 'skipOnError' => true, 'targetClass' => Marca::class, 'targetAttribute' => ['id_marca' => 'id']],
             [['id_modelo'], 'exist', 'skipOnError' => true, 'targetClass' => Modelo::class, 'targetAttribute' => ['id_modelo' => 'id']],
