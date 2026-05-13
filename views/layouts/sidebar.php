@@ -52,7 +52,11 @@
             ['label' => 'Modelos (equipos)','icon' => 'layer-group',     'url' => ['/modelo']],
             ['label' => 'Servicios/Sectores',        'icon' => 'concierge-bell',   'url' => ['/servicio']],
             ['label' => 'Tipo de equipo',   'icon' => 'tools',            'url' => ['/tipoequipo']],
-            ['label' => 'Proveedor',   'icon' => 'truck',            'url' => ['/proveedor']],
+            ['label' => 'Proveedores',   'icon' => 'truck',            'url' => ['/proveedor']],
+            ['label' => 'Componentes', 'icon' => 'puzzle-piece', 'url' => ['/componente']],
+            ['label' => 'Tipo de componentes', 'icon' => 'layer-group', 'url' => ['/tipocomponente']]
+
+
             ],
           ],
           ['label' => 'Parametrización', 'icon' => 'sliders-h','iconClassAdded' => 'text-warning', 'url' => ['/parametrizacion']

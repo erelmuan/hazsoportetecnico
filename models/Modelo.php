@@ -79,7 +79,7 @@ class Modelo extends \yii\db\ActiveRecord
           'nombre' => Yii::t('app', 'Nombre'),
           'descripcion' => Yii::t('app', 'Descripcion'),
           'anio' => Yii::t('app', 'Anio'),
-          'id_marca' => Yii::t('app', 'Id Marca'),
+          'id_marca' => Yii::t('app', 'Marca'),
         ];
     }
 

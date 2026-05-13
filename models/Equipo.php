@@ -28,6 +28,7 @@ use app\models\patronState\EstadoBase;
  * @property Adjunto[] $adjuntos0
  * @property Estado $estado
  * @property Log[] $logs
+ * @property Componente[] $componentes
  * @property Marca $marca
  * @property Modelo $modelo
  * @property Servicio $servicio
@@ -591,4 +592,13 @@ class Equipo extends \yii\db\ActiveRecord
         return $this->hasOne(Tipoequipo::class, ['id' => 'id_tipoequipo']);
     }
 
+   /** 
+    * Gets query for [[Componentes]].
+    *
+    * @return \yii\db\ActiveQuery
+    */
+   public function getComponentes()
+   {
+       return $this->hasMany(Componente::class, ['id_equipo' => 'id']);
+   }
 }

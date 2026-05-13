@@ -19,6 +19,8 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use app\components\Metodos\Metodos;
 use app\models\AdjuntoEquipo;
+use app\models\ComponenteSearch;
+use app\models\Componente;
 
 
 /**
@@ -34,6 +36,7 @@ class EquipoController extends BaseController
      */
     public function actionIndex()
     {
+
         $searchModel = new EquipoSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $dataProvider->pagination->pageSize = 10;
@@ -73,15 +76,15 @@ class EquipoController extends BaseController
         }
     }
 
- /** Devolver las relaciones en forma de arrays */
-   public function devolverArrayHelper()
-  {
-      $marcas = ArrayHelper::map(Marca::find()->orderBy('nombre')->all(), 'id', 'nombre');
-      $modelos = ArrayHelper::map(Modelo::find()->orderBy('nombre')->all(), 'id', 'nombre');
-      $servicios = ArrayHelper::map(Servicio::find()->orderBy('nombre')->all(), 'id', 'nombre');
-      $tipoEquipos = ArrayHelper::map(TipoEquipo::find()->orderBy('nombre')->all(), 'id', 'nombre');
-      return ['marcas'=>$marcas,'modelos'=>$modelos,'servicios'=>$servicios,'tipoequipos'=>$tipoEquipos];
-  }
+     /** Devolver las relaciones en forma de arrays */
+       public function devolverArrayHelper()
+      {
+          $marcas = ArrayHelper::map(Marca::find()->orderBy('nombre')->all(), 'id', 'nombre');
+          $modelos = ArrayHelper::map(Modelo::find()->orderBy('nombre')->all(), 'id', 'nombre');
+          $servicios = ArrayHelper::map(Servicio::find()->orderBy('nombre')->all(), 'id', 'nombre');
+          $tipoEquipos = ArrayHelper::map(TipoEquipo::find()->orderBy('nombre')->all(), 'id', 'nombre');
+          return ['marcas'=>$marcas,'modelos'=>$modelos,'servicios'=>$servicios,'tipoequipos'=>$tipoEquipos];
+      }
 
 
 
@@ -217,7 +220,181 @@ class EquipoController extends BaseController
             }
         }
     }
+    public function actionListdetalle(){
 
+          $request= Yii::$app->request;
+          if($request->isAjax){
+            if(!empty($request->post('expandRowKey'))){
+              $id_equipo= $request->post('expandRowKey');
+              $searchModel= new ComponenteSearch();
+              $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+              $dataProvider->query->where( ['id_equipo'=>$id_equipo , 'baja' => false]);
+              $dataProvider->setPagination(false);
+              $dataProvider->setSort(false);
+              return $this->renderPartial('_listDetalle',[
+                'id_maestro' =>$id_equipo,
+                'dataProvider'=>  $dataProvider,
+               'searchModel'=>$searchModel]
+            );
+            }
+
+
+          }
+
+    }
+
+    public function actionAddcomponente()
+    {
+        $request = Yii::$app->request;
+        if ($request->isPost) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $keys = $request->post('keylist');
+            $id_maestro = $request->post('id_maestro');
+            try {
+                if (!empty($keys)) {
+                    foreach ($keys as $id_componente) {
+                        $model = Componente::findOne($id_componente);
+                        if ($model !== null) {
+                            $model->id_equipo = $id_maestro;
+                            $model->save(false);
+                        }
+                    }
+                    return [
+                        'status' => 'success','id_maestro'=>Yii::$app->request->post('id_maestro')
+                    ];
+                }
+                return [
+                    'status' => 'error',
+                ];
+
+            } catch (\Exception $e) {
+                return [
+                    'status' => 'error',
+                ];
+            }
+        }
+        if ($request->isAjax) {
+            $searchModel = new ComponenteSearch();
+            $dataProvider = $searchModel->search($request->queryParams);
+            $dataProvider->query->where([
+                'and',
+                [
+                    'or',
+                    ['<>', 'id_equipo', $request->get('id_maestro')],
+                    ['id_equipo' => null]
+                ],
+                ['baja' => false]
+            ]);
+            $modelDetalle = new Componente();
+            $columnas = Metodos::obtenerColumnas($modelDetalle);
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return [
+                'title' => 'Agregar Componente',
+                'content' => $this->renderAjax('_addComponente', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                    'columns' => $columnas,
+                    'id_maestro' => $request->get('id_maestro'),
+                ]),
+            ];
+        }
+        return $this->redirect(['index']);
+    }
+
+
+
+    public function actionReasigcomponente()
+    {
+        if (!Yii::$app->request->isAjax) {
+            return $this->redirect(['index']);
+        }
+        $searchModel = new EquipoSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $idComponente = Yii::$app->request->get('id_componente');
+        $dataProvider->query->where([
+            'or',
+            ['<>', 'equipo.id', Yii::$app->request->get('id_maestro')]
+        ]);
+
+        $dataProvider->pagination->pageSize = 10;
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        if ($keylist = Yii::$app->request->post('keylist')) {
+            try {
+                $idComponente = Yii::$app->request->post('id_componente');
+                $componente = Componente::findOne(['id' => $idComponente]);
+                if (!$componente) {
+                    return [
+                        'status' => 'error',
+                        'title' => '<p style="color:red">ERROR</p>',
+                        'content' => '<div>Componente no encontrado.</div>'
+                    ];
+                }
+                $componente->id_equipo = $keylist;
+                if ($componente->save(false)) {
+                    return [
+                        'status' => 'success'
+                    ];
+                } else {
+                    return [
+                        'status' => 'error',
+                        'title' => '<p style="color:red">ERROR</p>',
+                        'content' => '<div>No se pudo guardar el componente.</div>'
+                    ];
+                }
+            } catch (\Exception $e) {
+                return [
+                    'status' => 'error',
+                    'title' => '<p style="color:red">ERROR</p>',
+                    'content' => '<div>Error en la operación.</div>'
+                ];
+            }
+        }
+        return [
+            'title' => 'Reasignar un componente a un equipo',
+            'content' => $this->renderAjax('_reasigComponente', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                'id_componente' => $idComponente,
+                'id_maestro'=> Yii::$app->request->get('id_maestro'),
+            ])
+        ];
+    }
+
+
+    public function actionDesvcomponente()
+      {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+          if(Yii::$app->request->isPost){
+          try {
+              $model = Componente::findOne(Yii::$app->request->post('id_componente'));
+              if ($model !== null) {
+                  $model->id_equipo = null;
+                  if ($model->save(false)) {
+                    return [
+                        'status' => 'success',
+                    ];
+                  }
+              }
+              return [
+                  'status' => 'error',
+                  'title' => '<p style="color:red">ERROR</p>',
+                  'content' => '<div>No se pudo quitar el componente.</div>',
+              ];
+          } catch (\Exception $e) {
+              return [
+                  'title' => '<p style="color:red">ERROR</p>',
+                  'content' => '<div>Error en la operación.</div>',
+              ];
+          }
+          }
+          return [
+              'title' => 'Confirmar',
+              'content' => $this->renderAjax('_desvComponente', [
+                  'id_componente' => Yii::$app->request->get('id_componente'),
+                  'id_maestro'=> Yii::$app->request->get('id_maestro'),
+              ])
+          ];
+      }
     //delete heredado
 
 
@@ -245,6 +422,11 @@ class EquipoController extends BaseController
         }
         echo Json::encode(['output' => '', 'selected' => '']);
     }
+
+
+
+
+
     /**
      * Finds the Equipo model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

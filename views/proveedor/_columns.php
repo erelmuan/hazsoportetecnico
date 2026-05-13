@@ -4,10 +4,7 @@ use app\components\MyActionColumn;
 use yii\helpers\Html;
 
 return [
-    [
-        'class' => 'kartik\grid\CheckboxColumn',
-        'width' => '20px',
-    ],
+
     [
         'class' => 'kartik\grid\SerialColumn',
         'width' => '30px',

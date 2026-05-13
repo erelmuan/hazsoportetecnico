@@ -7,21 +7,33 @@ use hoaaah\ajaxcrud\CrudAsset;
 use hoaaah\ajaxcrud\BulkButtonWidget;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\models\ProveedorSearch */
+/* @var $searchModel app\models\ComponenteSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::t('app', 'Proveedores');
+$this->title = Yii::t('app', 'Componentes');
 $this->params['breadcrumbs'][] = $this->title;
 
 CrudAsset::register($this);
+$this->registerJs("
+    // Fix para permitir escribir en Select2 dentro de modales
+    $('#ajaxCrudModal').removeAttr('tabindex');
+
+    // ✅ Fix tamaño modal: resetear a modal-lg cada vez que se cierra
+    $('#ajaxCrudModal').on('hidden.bs.modal', function () {
+        $(this).find('.modal-dialog')
+            .removeClass('modal-sm modal-xl modal-dialog-centered')
+            .addClass('modal-lg');
+    });
+");
 
 ?>
+
 <div class="card">
   <!-- Header: título a la izquierda y acciones a la derecha -->
   <div class="card-header d-flex">
       <!-- Título (opcional y discreto) -->
       <div class="d-flex align-items-center">
-          <i class="fas fa-truck mr-2" aria-hidden="true"></i>
+          <i class="fas fa-puzzle-piece mr-2" aria-hidden="true"></i>
       </div>
 
       <!-- Acciones empujadas a la derecha -->
@@ -45,8 +57,7 @@ CrudAsset::register($this);
       </div>
   </div>
   <div class="card-body pt-3 pb-2">
-
-<div class="proveedor-index">
+<div class="componente-index">
     <div id="ajaxCrudDatatable">
         <?=GridView::widget([
             'id'=>'crud-datatable',
@@ -56,23 +67,29 @@ CrudAsset::register($this);
             'columns' => require(__DIR__.'/_columns.php'),
             'toolbar'=> [
                 ['content'=>
+                    Html::a('<i class="glyphicon glyphicon-plus"></i>', ['create'],
+                    ['role'=>'modal-remote','title'=> 'Crear nuevas Componentes','class'=>'btn btn-default']).
+                    Html::a('<i class="glyphicon glyphicon-repeat"></i>', [''],
+                    ['data-pjax'=>1, 'class'=>'btn btn-default', 'title'=>'Refrescar']).
+                    '{toggleData}'.
                     '{export}'
                 ],
             ],
-            'striped' => true,
-            'condensed' => true,
-            'responsive' => true,
-            'summaryOptions' => ['class' => 'text-muted small mb-2'],
-        ])?>
-    </div>
-</div>
-</div>
-
-</div>
-
-<?php Modal::begin([
-    "id"=>"ajaxCrudModal",
-    "size"=> Modal::SIZE_LARGE,
-    "footer"=>"",// always need it for jquery plugin
-])?>
-<?php Modal::end(); ?>
+              'striped' => true,
+              'condensed' => true,
+              'responsive' => true,
+              'summaryOptions' => ['class' => 'text-muted small mb-2'],
+          ])?>
+      </div>
+  </div>
+  </div>
+  <div class="card-footer text-muted small">
+  <?= Html::encode('Listado de Componentes') ?>
+  </div>
+  </div>
+  <?php Modal::begin([
+  "id"=>"ajaxCrudModal",
+  "size" => Modal::SIZE_LARGE,
+  "footer"=>"",// always need it for jquery plugin
+  ])?>
+  <?php Modal::end(); ?>

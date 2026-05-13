@@ -1,3 +1,4 @@
+
 <?php
 use yii\helpers\Url;
 use yii\helpers\Html;
@@ -6,6 +7,7 @@ use kartik\grid\GridView;
 use hoaaah\ajaxcrud\CrudAsset;
 use hoaaah\ajaxcrud\BulkButtonWidget;
 use app\components\MyActionColumn;
+use kartik\grid\ExpandRowColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\EquipoSearch */
@@ -15,11 +17,57 @@ $this->title = 'Equipos';
 $this->params['breadcrumbs'][] = $this->title;
 
 CrudAsset::register($this);
+?>
+<?php
+$this->registerJs("
+    // Fix para permitir escribir en Select2 dentro de modales
+    $('#ajaxCrudModal').removeAttr('tabindex');
 
-$columns[]=    [
-        'class' => MyActionColumn::class,
-        'template' => '{view} {update} {delete} {attachments} {log}',
-        'buttons' => [
+    // ✅ Fix tamaño modal: resetear a modal-lg cada vez que se cierra
+    $('#ajaxCrudModal').on('hidden.bs.modal', function () {
+        $(this).find('.modal-dialog')
+            .removeClass('modal-sm modal-xl modal-dialog-centered')
+            .addClass('modal-lg');
+    });
+");
+
+
+$this->registerJsVar('appConfig', [
+    'listDetalleUrl' => Url::to(['listdetalle']),
+    'desvincularComponenteUrl' => Url::to([
+        '/equipo/desvcomponente'
+    ]),
+    'addComponenteUrl' => Url::to([
+        'addcomponente'
+    ]),
+    'reasigComponenteUrl' => Url::to([
+        'reasigcomponente'
+    ]),
+]);
+
+$this->registerJsFile(
+    '@web/js/equipo-componente.js',
+    ['depends' => [\yii\web\JqueryAsset::class]]
+);
+
+// 1. Expandir fila (PRIMERO)
+array_unshift($columns, [
+    'class' => 'kartik\grid\ExpandRowColumn',
+    'width' => '50px',
+    'value' => function ($model, $key, $index, $column) {
+        return GridView::ROW_COLLAPSED;
+    },
+    'detailUrl' => Url::to(['/equipo/listdetalle']),
+    'expandOneOnly' => true,
+    // 🔥 IMPORTANTE
+    'enableCache' => false,
+]);
+
+// 4. Acciones
+$columns[] = [
+    'class' => MyActionColumn::class,
+    'template' => '{view} {update} {delete} {attachments} {log}',
+    'buttons' => [
         'attachments' => function($url, $model, $key) {
             $icon = '<i class="fas fa-paperclip"></i>';
             return Html::a($icon, Url::to(['adjunto/index', 'id_equipo' => $model->id]), [
@@ -37,17 +85,11 @@ $columns[]=    [
             ]);
         },
     ],
-    ];
+];
 
 ?>
-<?php
-$this->registerJs("
-    // Fix para permitir escribir en Select2 dentro de modales
-$('#ajaxCrudModal').removeAttr('tabindex');
-");
-?>
+
 <div class="card">
-
   <!-- Header: título a la izquierda y acciones a la derecha -->
   <div class="card-header d-flex">
       <!-- Título (opcional y discreto) -->
@@ -83,21 +125,52 @@ $('#ajaxCrudModal').removeAttr('tabindex');
 
   <!-- Body: Grid dentro del mismo card -->
   <div class="card-body pt-3 pb-2">
-      <div class="equipo-index">
-          <div id="ajaxCrudDatatable">
-              <?= GridView::widget([
-                  'id'=>'crud-datatable',
-                  'dataProvider' => $dataProvider,
-                  'filterModel' => $searchModel,
-                  'pjax'=>true,
-                  'columns' => $columns,
-                  'striped' => true,
-                  'condensed' => true,
-                  'responsive' => true,
-                  'summaryOptions' => ['class' => 'text-muted small mb-2'],
-              ]); ?>
-          </div>
-      </div>
+
+    <div class="rol-index">
+        <div id="ajaxCrudDatatable">
+            <?=GridView::widget([
+                'id'=>'crud-datatable',
+                'dataProvider' => $dataProvider,
+                'filterModel' => $searchModel,
+                'pjax'=>true,
+                //Para que no busque automaticamente, sino que espere a que se teclee ENTER
+                'filterOnFocusOut'=>false,
+                'columns' => $columns,
+
+                'exportConfig'=> [
+                             GridView::CSV=>[
+                                 'label' => 'CSV',
+                                 'icon' => '',
+                                 // 'iconOptions' => '',
+                                 'showHeader' => false,
+                                 'showPageSummary' => false,
+                                 'showFooter' => false,
+                                 'showCaption' => false,
+                                 'filename' => 'yii',
+                                 'alertMsg' => 'created',
+                                 'options' => ['title' => 'Semicolon -  Separated Values'],
+                                 'mime' => 'application/csv',
+                                 'config' => [
+                                     'colDelimiter' => ";",
+                                     'rowDelimiter' => "\r\n",
+                                 ],
+                             ],
+                         ],
+
+                'striped' => true,
+                'condensed' => true,
+                //Adaptacion para moviles
+                'responsiveWrap' => false,
+                'panel' => [
+                    'type' => 'primary',
+                    'heading' => '<i class="glyphicon glyphicon-list"></i> Lista de roles',
+                    'before'=>'<em>* Para buscar algún registro tipear en el filtro y presionar ENTER </em>',
+                    '<div class="clearfix"></div>',
+                ]
+            ])?>
+        </div>
+    </div>
+    </div>
   </div>
 
   <div class="card-footer text-muted small">
@@ -107,6 +180,7 @@ $('#ajaxCrudModal').removeAttr('tabindex');
 
 <?php Modal::begin([
     "id" => "ajaxCrudModal",
+    "size"=> Modal::SIZE_LARGE,
     "footer" => "", // necesario para ajaxcrud
 ]) ?>
 <?php Modal::end(); ?>

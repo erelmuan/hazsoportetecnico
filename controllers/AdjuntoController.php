@@ -23,12 +23,12 @@ class AdjuntoController extends BaseController
   public function devolverModelos($id_equipo){
 
     $searchModel = new AdjuntoSearch();
-    // EVOLUCIONES ENFERMERIA //
+    // Categoria operativo //
     $dataProviderOp = $searchModel->search(Yii::$app->request->queryParams ,Adjunto::TIPOCATEGORIA_OPERATIVO,$id_equipo);
-    $dataProviderOp ->pagination->pageSize = 7;
-    //EVOLUCIONES LOS DEMAS PROFRESIONALES//
+    $dataProviderOp->pagination->pageSize = 7;
+    //Categoria bibliografía//
     $dataProviderBib = $searchModel->search(Yii::$app->request->queryParams,Adjunto::TIPOCATEGORIA_BIBLIOGRAFIA,$id_equipo);
-    $dataProviderBib ->pagination->pageSize = 7;
+    $dataProviderBib->pagination->pageSize = 7;
     $dataConfig=[
             'searchModel' => $searchModel,
             'dataProviderOp' => $dataProviderOp,
